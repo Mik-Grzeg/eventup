@@ -1,0 +1,15 @@
+FROM rust:1.72-bookworm as builder
+
+ARG TARGETPLATFORM
+
+RUN apt-get update \
+    && apt-get upgrade -y
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETPLATFORM} cargo install sqlx-cli --no-default-features --features postgres \
+  && mv /usr/local/cargo/bin/sqlx /sqlx
+
+FROM debian:bookworm-slim AS runtime
+
+COPY --from=builder /sqlx /sqlx 
+
+ENTRYPOINT /sqlx migrate run

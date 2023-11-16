@@ -8,6 +8,15 @@ include:
   - ./docker/clickhouse/cluster_2s_2r/docker-compose.yaml
 services:
 
+  postgres-migrator:
+    build:
+      dockerfile: docker/Dockerfile.migrator
+    container_name: postgres-migrator
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/postgres
+    volumes:
+      - ./services/auth/migrations:/migrations
+
   # For OLTP workload
   postgres:
     image: postgres:latest
