@@ -1,0 +1,5 @@
+-- CREATE TABLE IF NOT EXISTS employees (
+--   user_id UUID,
+--   from TIMESTAMP,
+--   to TIMESTAMP
+-- );

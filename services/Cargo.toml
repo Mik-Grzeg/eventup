@@ -1,0 +1,11 @@
+[workspace]
+members = [
+  "company",
+  "appointments",
+]
+resolver = "2"
+
+[workspace.dependencies]
+axum = { version = "0.6.20", features = ["tracing"] }
+tokio = { version = "1.34.0", features = ["macros", "rt-multi-thread"] }
+

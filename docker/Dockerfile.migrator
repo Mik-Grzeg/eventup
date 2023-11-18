@@ -12,4 +12,9 @@ FROM debian:bookworm-slim AS runtime
 
 COPY --from=builder /sqlx /sqlx 
 
+RUN mkdir migrations
+COPY services/auth/migrations/* /migrations
+COPY services/appointments/migrations/* /migrations
+COPY services/company/migrations/* /migrations
+
 ENTRYPOINT /sqlx migrate run

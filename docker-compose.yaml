@@ -14,8 +14,6 @@ services:
     container_name: postgres-migrator
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/postgres
-    volumes:
-      - ./services/auth/migrations:/migrations
 
   # For OLTP workload
   postgres:

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS user_log_infos (
-  user_id INT PRIMARY KEY,
+  user_id UUID PRIMARY KEY,
   -- in case we wanted to make it multi tenant sas
   -- group_id INT,
   email text UNIQUE NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS user_log_infos (
 );
 
 CREATE TABLE IF NOT EXISTS user_accounts (
-  user_id INT PRIMARY KEY REFERENCES user_log_infos (user_id),
+  user_id UUID PRIMARY KEY REFERENCES user_log_infos (user_id),
   phone_number text UNIQUE NOT NULL,
   first_name VARCHAR(255),
   last_name VARCHAR(255)

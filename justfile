@@ -13,4 +13,6 @@ down-log:
 # list containers
 ps: 
   docker compose ps
-
+# drops to postgresql shell
+psql:
+  docker compose exec postgres psql -U postgres
