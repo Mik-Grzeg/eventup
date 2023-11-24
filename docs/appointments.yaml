@@ -1,0 +1,266 @@
+openapi: "3.0.0"
+info:
+  title: Appointment Management API
+  version: 1.0.0
+paths:
+  /services:
+    post:
+      summary: Create a new service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company_id:
+                  type: string
+                  format: uuid
+                  description: The ID of the company offering the service
+                name:
+                  type: string
+                  description: The name of the service
+                duration:
+                  type: string
+                  format: duration
+                  description: The duration of the service
+                price:
+                  type: string
+                  format: money
+                  description: The price of the service
+      responses:
+        '201':
+          description: Service created successfully
+        '400':
+          description: Bad request
+
+  /services/{service_id}:
+    get:
+      summary: Get service details by service ID
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          description: ID of the service to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+        '404':
+          description: Service not found
+
+    put:
+      summary: Update service details by service ID
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          description: ID of the service to update
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Service"
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad request
+        '404':
+          description: Service not found
+
+    delete:
+      summary: Delete service by service ID
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          description: ID of the service to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Service deleted successfully
+        '404':
+          description: Service not found
+
+  /appointments:
+    post:
+      summary: Create a new appointment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Appointment"
+      responses:
+        '201':
+          description: Appointment created successfully
+        '400':
+          description: Bad request
+
+  /appointments/{appointment_id}:
+    get:
+      summary: Get appointment details by appointment ID
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          description: ID of the appointment to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        '404':
+          description: Appointment not found
+
+    put:
+      summary: Update appointment details by appointment ID
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          description: ID of the appointment to update
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Appointment"
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad request
+        '404':
+          description: Appointment not found
+
+    delete:
+      summary: Delete appointment by appointment ID
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          description: ID of the appointment to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Appointment deleted successfully
+        '404':
+          description: Appointment not found
+
+components:
+  schemas:
+    Service:
+      type: object
+      properties:
+        service_id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The unique identifier for a service
+        company_id:
+          type: string
+          format: uuid
+          description: The ID of the company offering the service
+        name:
+          type: string
+          description: The name of the service
+        duration:
+          type: string
+          format: duration
+          description: The duration of the service
+        price:
+          type: string
+          format: money
+          description: The price of the service
+
+    Appointment:
+      type: object
+      properties:
+        appointment_id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The unique identifier for an appointment
+        company_id:
+          type: string
+          format: uuid
+          description: The ID of the company where the appointment is scheduled
+        service_id:
+          type: string
+          format: uuid
+          description: The ID of the service associated with the appointment
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The timestamp when the appointment was created
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: The timestamp when the appointment was last updated
+        client_id:
+          type: string
+          format: uuid
+          description: The ID of the client for the appointment
+        employee_id:
+          type: string
+          format: uuid
+          description: The ID of the employee handling the appointment
+        client_name:
+          type: string
+          description: The name of the client
+        start_time:
+          type: string
+          format: date-time
+          description: The start time of the appointment
+        end_time:
+          type: string
+          format: date-time
+          description: The end time of the appointment
+        price_expected:
+          type: string
+          format: money
+          description: The expected price for the service
+        price_final:
+          type: string
+          format: money
+          description: The final price for the service
+        discount:
+          type: number
+          format: decimal
+          description: The discount applied to the service price
+        canceled:
+          type: boolean
+          description: Indicates whether the appointment has been canceled
+        cancellation_reason:
+          type: string
+          description: The reason for canceling the appointment
+        provided:
+          type: boolean
+          description: Indicates whether the service has been provided
+

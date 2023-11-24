@@ -1,6 +1,9 @@
 # start docker compose environment with default services
 start:
   docker compose up -d --build
+
+start-apps:
+  docker compose up -d --build users-api
 # delete all docker compose default services 
 down:
   docker compose down -v

@@ -14,6 +14,26 @@ services:
     container_name: postgres-migrator
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/postgres
+    depends_on: 
+      - postgres
+
+  # Application
+  users-api:
+    build:
+      dockerfile: docker/Dockerfile
+      args: 
+        DEBUG: debug
+    environment:
+      RUST_PG_URL: postgres://postgres:password@postgres:5432/postgres
+      RUST_PG_MAX_CONN: 5
+      RUST_LOG: debug
+    depends_on: 
+      - postgres-migrator
+
+    container_name: users-api
+    ports: 
+      - 9080:8080
+
 
   # For OLTP workload
   postgres:

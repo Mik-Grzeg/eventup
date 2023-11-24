@@ -1,0 +1,122 @@
+openapi: "3.0.0"
+info:
+  title: User Management API
+  version: 1.0.0
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The user's email address (unique)
+                password:
+                  type: string
+                  description: The user's password
+                phone_number:
+                  type: string
+                  description: The user's phone number (unique)
+                first_name:
+                  type: string
+                  description: The user's first name
+                last_name:
+                  type: string
+                  description: The user's last name
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Bad request
+
+  /users/{user_id}:
+    get:
+      summary: Get user details by user ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '404':
+          description: User not found
+
+    put:
+      summary: Update user details by user ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user to update
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Bad request
+        '404':
+          description: User not found
+
+    delete:
+      summary: Delete user by user ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The unique identifier for a user
+        email:
+          type: string
+          format: email
+          description: The user's email address (unique)
+        phone_number:
+          type: string
+          description: The user's phone number (unique)
+        first_name:
+          type: string
+          description: The user's first name
+        last_name:
+          type: string
+          description: The user's last name
+
