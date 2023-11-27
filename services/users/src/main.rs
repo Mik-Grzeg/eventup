@@ -1,24 +1,4 @@
-use std::{net::SocketAddr, sync::Arc};
-use tracing_subscriber::{prelude::*, EnvFilter, Registry};
-
-use crate::{app_state::AppState, config::AppConfig};
-
-mod app_state;
-mod config;
-mod handlers;
-mod repository;
-mod types;
-
-pub fn init_tracing() {
-    let logger = tracing_subscriber::fmt::layer().compact();
-    let env_filter = EnvFilter::try_from_default_env()
-        .or(EnvFilter::try_new("info"))
-        .unwrap();
-
-    let collector = Registry::default().with(logger).with(env_filter);
-
-    tracing::subscriber::set_global_default(collector).unwrap();
-}
+use lib::{app_state::AppState, config::AppConfig, handlers, init_tracing};
 
 #[tokio::main]
 async fn main() {
@@ -31,12 +11,11 @@ async fn main() {
     // Build application with routes
     let app = handlers::router::router(app_state);
 
-    // Run the app with hyper, listening globally on port 8080
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
-    tracing::info!("Server is listening on {} address", addr);
+    // Listening globally on port 8080
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    tracing::info!("Server is listening on {:?}", listener);
 
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    axum::serve(listener, app)
         .await
         .expect("Server failed to start.");
 }

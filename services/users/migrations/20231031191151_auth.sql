@@ -16,5 +16,7 @@ CREATE TABLE IF NOT EXISTS user_accounts (
   user_id UUID PRIMARY KEY REFERENCES user_log_infos (user_id),
   phone_number text UNIQUE NOT NULL,
   first_name VARCHAR(255),
-  last_name VARCHAR(255)
+  last_name VARCHAR(255),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL
 );

@@ -20,3 +20,12 @@ impl AppConfig {
         config.try_deserialize().unwrap()
     }
 }
+
+impl Default for AppConfig {
+    fn default() -> Self {
+        Self {
+            pg_url: "postgres://postgres:password@localhost:5432/".into(),
+            pg_max_conn: 5,
+        }
+    }
+}
