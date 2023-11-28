@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-axum = { workspace = true, features = ["tracing"] }
+axum = { workspace = true, features = ["tracing", "macros"] }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "registry"] }
@@ -23,6 +23,8 @@ chrono = { version = "0.4.31", features = ["serde"] }
 thiserror = "1.0.50"
 validator = { version = "0.16.1", features = ["derive", "phone"] }
 serde_json = "1.0.108"
+jsonwebtoken = "9.1.0"
+tower-http = { version = "0.5.0", features = ["trace"] }
 
 [dev-dependencies]
 http-body-util = "0.1.0"

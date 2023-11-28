@@ -3,7 +3,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use uuid::Uuid;
 
-use crate::types::users::{UserAccountPut, UserGet, UserPost};
+use crate::types::users::{UserAccountPut, UserCredentials, UserGet, UserIdentifiers, UserPost};
 use error::RepositoryError;
 
 pub mod error;
@@ -20,12 +20,23 @@ pub trait UserRepository: Send + Sync {
         user: UserAccountPut,
     ) -> Result<Option<UserGet>, RepositoryError>;
     async fn delete_user(&self, user_id: Uuid) -> Result<(), RepositoryError>;
+    async fn auth_user(
+        &self,
+        user_credentials: UserCredentials,
+    ) -> Result<Option<UserIdentifiers>, RepositoryError>;
 }
 
 #[async_trait]
 impl<UR: UserRepository + ?Sized + 'static> UserRepository for Arc<UR> {
     async fn get_users(&self) -> Result<Vec<UserGet>, RepositoryError> {
         self.as_ref().get_users().await
+    }
+
+    async fn auth_user(
+        &self,
+        user_credentials: UserCredentials,
+    ) -> Result<Option<UserIdentifiers>, RepositoryError> {
+        self.as_ref().auth_user(user_credentials).await
     }
 
     async fn get_user_by_id(&self, user_id: Uuid) -> Result<Option<UserGet>, RepositoryError> {

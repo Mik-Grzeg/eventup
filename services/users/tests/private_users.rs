@@ -68,12 +68,46 @@ async fn test_proper_lifecycle(pool: PgPool) {
     assert_eq!(body.get("last_name").unwrap().as_str(), Some("Doe"));
     assert_eq!(body.get("created_at"), body.get("updated_at"));
 
+    // Login as the user
+    let response = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/auth/login")
+                .method(Method::POST)
+                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                .body(Body::from(
+                    json!({
+                        "email": "user@mail.com",
+                        "password": "StrongPassword123",
+                    })
+                    .to_string(),
+                ))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(StatusCode::OK, response.status());
+
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let body: Value = serde_json::from_slice(&body).unwrap();
+
+    let (token, r#type) = (body.get("token"), body.get("type"));
+    assert!(token.is_some());
+    assert!(r#type.is_some());
+    let auth_header = format!(
+        "{} {}",
+        r#type.unwrap().as_str().unwrap(),
+        token.unwrap().as_str().unwrap()
+    );
+
     // GET the user by ID
     let response = app
         .clone()
         .oneshot(
             Request::builder()
                 .uri(format!("/api/v1/users/{user_id}"))
+                .header(http::header::AUTHORIZATION, &auth_header)
                 .body(Body::empty())
                 .unwrap(),
         )
@@ -101,6 +135,7 @@ async fn test_proper_lifecycle(pool: PgPool) {
                 .uri(format!("/api/v1/users/{user_id}"))
                 .method(Method::PUT)
                 .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
+                .header(http::header::AUTHORIZATION, &auth_header)
                 .body(Body::from(
                     json!({
                         "first_name": "Johnny",
@@ -124,4 +159,33 @@ async fn test_proper_lifecycle(pool: PgPool) {
     assert_eq!(body.get("first_name").unwrap().as_str(), Some("Johnny"));
     assert_eq!(body.get("last_name").unwrap().as_str(), Some("Doe"));
     assert_ne!(body.get("created_at"), body.get("updated_at"));
+
+    // Delete the user
+    let response = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri(format!("/api/v1/users/{user_id}"))
+                .method(Method::DELETE)
+                .header(http::header::AUTHORIZATION, &auth_header)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(StatusCode::NO_CONTENT, response.status());
+
+    // GET the user by ID (should not be preset | return 404)
+    let response = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri(format!("/api/v1/users/{user_id}"))
+                .header(http::header::AUTHORIZATION, &auth_header)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(StatusCode::NOT_FOUND, response.status());
 }

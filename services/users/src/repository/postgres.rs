@@ -1,18 +1,25 @@
 use crate::config::AppConfig;
 use crate::repository::{error::RepositoryError, UserRepository};
-use crate::types::users::{generate_random_salt, update_user_account};
+use crate::types::users::{
+    generate_random_salt, update_user_account, UserCredentials, UserIdentifiers, UserPasswordsPair,
+};
 use crate::types::users::{UserAccountPut, UserGet, UserPost};
 use chrono::Utc;
 
 use async_trait::async_trait;
-use bcrypt::{hash_with_salt, DEFAULT_COST};
-use sqlx::postgres::{PgPool, PgPoolOptions};
+use bcrypt::{hash_with_salt, verify, DEFAULT_COST};
+use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
+use sqlx::Row;
 use uuid::Uuid;
 
 impl From<sqlx::Error> for RepositoryError {
     fn from(error: sqlx::Error) -> Self {
         tracing::error!("SQLX error: {error}");
-        RepositoryError
+        let db_error = error.into_database_error().map(|db_err| db_err.kind());
+        match db_error {
+            Some(err_kind) => RepositoryError::SQLXDatabase(err_kind),
+            None => RepositoryError::SQLXOther,
+        }
     }
 }
 
@@ -22,7 +29,7 @@ pub struct PgUserRepository {
 
     // queries
     get_user_by_id_query: String,
-    _get_user_passwd_query: String,
+    get_user_passwd_query: String,
 }
 
 impl PgUserRepository {
@@ -42,13 +49,13 @@ impl PgUserRepository {
         "#
         .to_owned();
 
-        let _get_user_passwd_query =
-            r#"SELECT password_hashed, password_salt WHERE user_id = $1"#.to_owned();
+        let get_user_passwd_query =
+            r#"SELECT password_hashed, password_salt, user_id, email FROM user_log_infos WHERE email = $1"#.to_owned();
 
         Self {
             pool,
             get_user_by_id_query,
-            _get_user_passwd_query,
+            get_user_passwd_query,
         }
     }
 
@@ -69,6 +76,44 @@ impl UserRepository for PgUserRepository {
         unimplemented!()
     }
 
+    async fn auth_user(
+        &self,
+        user_credentials: UserCredentials,
+    ) -> Result<Option<UserIdentifiers>, RepositoryError> {
+        let UserCredentials { email, password } = user_credentials;
+        let Some((user_passswords_pair, user_identifiers)) =
+            sqlx::query(&self.get_user_passwd_query)
+                .bind(email)
+                .map(
+                    |row: PgRow| -> Result<(UserPasswordsPair, UserIdentifiers), RepositoryError> {
+                        Ok((
+                            UserPasswordsPair {
+                                password_hashed: row.try_get("password_hashed")?,
+                                password_salt: row.try_get("password_salt")?,
+                            },
+                            UserIdentifiers {
+                                email: row.try_get("email")?,
+                                id: row.try_get("user_id")?,
+                            },
+                        ))
+                    },
+                )
+                .fetch_optional(&self.pool)
+                .await?
+                .transpose()?
+        else {
+            return Ok(None);
+        };
+
+        let verified_password =
+            verify(password, &user_passswords_pair.password_hashed).map_err(|err| {
+                tracing::error!("Veryfing password error: {err}");
+                RepositoryError::Encryption(err.to_string())
+            })?;
+
+        Ok(verified_password.then_some(user_identifiers))
+    }
+
     async fn get_user_by_id(
         &self,
         user_id: uuid::Uuid,
@@ -82,13 +127,13 @@ impl UserRepository for PgUserRepository {
     async fn create_user(&self, user_post: UserPost) -> Result<UserGet, RepositoryError> {
         let uuid = Uuid::new_v4();
         let salt = generate_random_salt();
-        let password_hashed = hash_with_salt(user_post.password, DEFAULT_COST, salt)?;
+        let password_hashed = hash_with_salt(user_post.credentials.password, DEFAULT_COST, salt)?;
         let now = Utc::now();
 
         let mut tx = self.pool.begin().await?;
         sqlx::query("INSERT INTO user_log_infos (user_id, email, password_hashed, password_salt) VALUES ($1, $2, $3, $4)")
             .bind(uuid)
-            .bind(user_post.email.clone())
+            .bind(user_post.credentials.email.clone())
             .bind(password_hashed.to_string())
             .bind(salt)
             .execute(&mut *tx)
@@ -106,7 +151,7 @@ impl UserRepository for PgUserRepository {
 
         let created_user = UserGet {
             user_id: uuid,
-            email: user_post.email,
+            email: user_post.credentials.email,
             phone_number: user_post.phone_number,
             first_name: user_post.account.first_name,
             last_name: user_post.account.last_name,

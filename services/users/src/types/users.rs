@@ -15,13 +15,13 @@ pub struct UserAccountPut {
 
 #[derive(Debug, Deserialize, Serialize, Validate)]
 pub struct UserPost {
-    #[validate(email)]
-    pub email: String,
-    #[validate(length(min = 8))]
-    pub password: String,
+    #[serde(flatten)]
+    #[validate]
+    pub credentials: UserCredentials,
     #[validate(phone)]
     pub phone_number: String,
     #[serde(flatten)]
+    #[validate]
     pub account: UserAccountPut,
 }
 
@@ -36,6 +36,26 @@ pub struct UserGet {
     pub updated_at: DateTime<Utc>,
 }
 
+#[derive(Debug, Deserialize, Serialize, Validate)]
+pub struct UserCredentials {
+    #[validate(email)]
+    pub email: String,
+    #[validate(length(min = 8))]
+    pub password: String,
+}
+
+#[derive(FromRow)]
+pub struct UserPasswordsPair {
+    pub password_hashed: String,
+    pub password_salt: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserIdentifiers {
+    pub id: Uuid,
+    pub email: String,
+}
+
 pub fn update_user_account(old_user_data: &mut UserGet, updated_user_data: UserAccountPut) {
     old_user_data.first_name = updated_user_data
         .first_name
@@ -43,11 +63,6 @@ pub fn update_user_account(old_user_data: &mut UserGet, updated_user_data: UserA
     old_user_data.last_name = updated_user_data
         .last_name
         .or(old_user_data.last_name.take());
-}
-
-pub struct UserAuth {
-    pub password_hashed: [u8; 16],
-    pub password_salt: String,
 }
 
 pub fn generate_random_salt() -> [u8; 16] {

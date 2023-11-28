@@ -6,6 +6,9 @@ pub struct AppConfig {
     // postgresql settings
     pub pg_url: String,
     pub pg_max_conn: u32,
+
+    // auth key
+    pub secret_key: String,
 }
 
 impl AppConfig {
@@ -26,6 +29,7 @@ impl Default for AppConfig {
         Self {
             pg_url: "postgres://postgres:password@localhost:5432/".into(),
             pg_max_conn: 5,
+            secret_key: "secret-key".into(),
         }
     }
 }

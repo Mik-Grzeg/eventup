@@ -26,6 +26,7 @@ services:
     environment:
       RUST_PG_URL: postgres://postgres:password@postgres:5432/postgres
       RUST_PG_MAX_CONN: 5
+      RUST_SECRET_KEY: "secret-key"
     depends_on: 
       - postgres-migrator
 

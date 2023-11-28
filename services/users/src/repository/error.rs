@@ -2,7 +2,11 @@ use bcrypt::BcryptError;
 use std::error::Error;
 
 #[derive(Debug)]
-pub struct RepositoryError;
+pub enum RepositoryError {
+    Encryption(String),
+    SQLXDatabase(sqlx::error::ErrorKind),
+    SQLXOther,
+}
 
 impl Error for RepositoryError {}
 
@@ -13,7 +17,7 @@ impl std::fmt::Display for RepositoryError {
 }
 
 impl From<BcryptError> for RepositoryError {
-    fn from(_error: BcryptError) -> Self {
-        RepositoryError
+    fn from(error: BcryptError) -> Self {
+        RepositoryError::Encryption(error.to_string())
     }
 }
