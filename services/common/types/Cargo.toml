@@ -1,9 +1,10 @@
 [package]
-name = "postgres_fixtures"
+name = "types"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sqlx = { workspace = true, features = ["runtime-tokio", "postgres", "chrono", "uuid", "macros"] }
+uuid = { workspace = true, features = ["serde", "v4"] }
+serde = { workspace = true, features = ["derive"] }

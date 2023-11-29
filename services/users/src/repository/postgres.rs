@@ -1,8 +1,9 @@
 use crate::config::AppConfig;
 use crate::repository::{error::RepositoryError, UserRepository};
 use crate::types::users::{
-    generate_random_salt, update_user_account, UserCredentials, UserIdentifiers, UserPasswordsPair,
+    generate_random_salt, update_user_account, UserCredentials, UserPasswordsPair,
 };
+use common_types::UserIdentifiers;
 use crate::types::users::{UserAccountPut, UserGet, UserPost};
 use chrono::Utc;
 

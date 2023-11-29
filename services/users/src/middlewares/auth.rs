@@ -12,9 +12,10 @@ use crate::{
     app_state::AppState,
     types::{
         jwt::{token_is_valid, JWTClaims, LoginTokenRespone},
-        users::UserIdentifiers,
     },
 };
+
+use common_types::UserIdentifiers;
 
 pub struct RequireAuth(pub UserIdentifiers);
 
@@ -71,3 +72,4 @@ where
         Ok(RequireAuth(user_identifiers))
     }
 }
+

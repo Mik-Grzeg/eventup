@@ -26,14 +26,18 @@ serde_json = "1.0.108"
 jsonwebtoken = "9.1.0"
 tower-http = { version = "0.5.0", features = ["trace"] }
 
+[dependencies.common_types]
+package = "types"
+path = "../common/types"
+
 [dev-dependencies]
 http-body-util = "0.1.0"
 mime = "0.3.17"
 pretty_assertions = "1.4.0"
 tower = "0.4.13"
 
-[dev-dependencies.postgres_fixtures]
-path = "../common/postgres_fixtures"
+[dev-dependencies.auth_extractor]
+path = "../common/auth_extractor"
 
 [lib]
 name = "lib"

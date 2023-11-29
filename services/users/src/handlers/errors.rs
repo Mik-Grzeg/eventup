@@ -61,3 +61,16 @@ impl From<RepositoryError> for (StatusCode, String) {
         }
     }
 }
+
+pub enum InternalError {
+    Unauthenticated,
+}
+
+impl IntoResponse for InternalError {
+    fn into_response(self) -> Response {
+        match self {
+            Self::Unauthenticated => (StatusCode::FORBIDDEN, "Unauthenticated"),
+        }
+        .into_response()
+    }
+}

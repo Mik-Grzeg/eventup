@@ -3,7 +3,8 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use uuid::Uuid;
 
-use crate::types::users::{UserAccountPut, UserCredentials, UserGet, UserIdentifiers, UserPost};
+use crate::types::users::{UserAccountPut, UserCredentials, UserGet, UserPost};
+use common_types::UserIdentifiers;
 use error::RepositoryError;
 
 pub mod error;

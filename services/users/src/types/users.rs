@@ -50,12 +50,6 @@ pub struct UserPasswordsPair {
     pub password_salt: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct UserIdentifiers {
-    pub id: Uuid,
-    pub email: String,
-}
-
 pub fn update_user_account(old_user_data: &mut UserGet, updated_user_data: UserAccountPut) {
     old_user_data.first_name = updated_user_data
         .first_name

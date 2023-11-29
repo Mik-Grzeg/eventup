@@ -5,7 +5,7 @@ use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use super::users::UserIdentifiers;
+use common_types::UserIdentifiers;
 
 #[derive(Serialize, Debug)]
 pub struct LoginTokenRespone {

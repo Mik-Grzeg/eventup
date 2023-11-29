@@ -3,7 +3,6 @@ members = [
   "company",
   "appointments",
   "users",
-  "common/postgres_fixtures"
 ]
 resolver = "2"
 

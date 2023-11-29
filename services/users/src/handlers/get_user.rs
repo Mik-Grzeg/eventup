@@ -5,9 +5,8 @@ use axum::response::Json;
 use uuid::Uuid;
 
 use crate::middlewares::auth::RequireAuth;
-// use crate::app_state::UserRepo;
 use crate::repository::UserRepository;
-use crate::types::users::{UserGet, UserIdentifiers};
+use crate::types::users::UserGet;
 
 use super::errors::PublicError;
 

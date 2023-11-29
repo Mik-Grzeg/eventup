@@ -10,7 +10,7 @@ use axum::{
 
 use tower_http::trace::TraceLayer;
 
-use super::{delete_user, get_user, login, post_user, put_user};
+use super::{delete_user, get_user, login, access_control, post_user, put_user};
 
 pub fn router(app_state: AppState) -> Router {
     let health_route = Router::new().route("/health", get(super::health::health));
@@ -30,6 +30,7 @@ pub fn router(app_state: AppState) -> Router {
 
     let auth_routers = Router::new()
         .route("/login", post(login::login))
+        .route("/access", get(access_control::access_control))
         .with_state(app_state);
 
     let api_routes = Router::new()

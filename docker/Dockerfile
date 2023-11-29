@@ -22,6 +22,6 @@ COPY --from=builder /users /app/users
 ENTRYPOINT /app/users
 
 FROM debian:bookworm-slim AS appointments
-COPY --from=builder /users /app/appointments
+COPY --from=builder /appointments /app/appointments
 
 ENTRYPOINT /app/appointments
