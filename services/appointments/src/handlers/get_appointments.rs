@@ -1,6 +1,5 @@
-
-use auth_extractor::AuthExtractor;
 use super::errors::PublicError;
+use auth_extractor::AuthExtractor;
 
 pub async fn get_appointments(
     AuthExtractor(user_identifiers): AuthExtractor,

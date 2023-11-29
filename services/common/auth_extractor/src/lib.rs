@@ -1,10 +1,10 @@
 use axum::async_trait;
 use axum::{
-    extract::{FromRef, FromRequest, FromRequestParts},
+    extract::{FromRef, FromRequestParts},
     http::{header, request::Parts, StatusCode},
 };
 use common_types::UserIdentifiers;
-use reqwest::ClientBuilder;
+
 use std::sync::Arc;
 
 // Custom extractor for authentication

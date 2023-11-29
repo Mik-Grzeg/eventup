@@ -29,7 +29,7 @@ impl Default for AppConfig {
         Self {
             pg_url: "postgres://postgres:password@localhost:5432/".into(),
             pg_max_conn: 5,
-            access_control_url: "http://users-api:8080/api/v1/auth/access".into()
+            access_control_url: "http://users-api:8080/api/v1/auth/access".into(),
         }
     }
 }

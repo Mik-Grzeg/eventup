@@ -1,4 +1,4 @@
-use std::sync::Arc;
+
 
 use async_trait::async_trait;
 use axum::{
@@ -6,12 +6,12 @@ use axum::{
     http::{header, request::Parts, StatusCode},
 };
 use chrono::{TimeZone, Utc};
-use jsonwebtoken::TokenData;
+
 
 use crate::{
     app_state::AppState,
     types::{
-        jwt::{token_is_valid, JWTClaims, LoginTokenRespone},
+        jwt::{token_is_valid, LoginTokenRespone},
     },
 };
 

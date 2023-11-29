@@ -1,9 +1,9 @@
 use crate::{
     app_state::AppState,
-    middlewares::{self, auth::RequireAuth},
+    middlewares::{auth::RequireAuth},
 };
 use axum::{
-    middleware::{from_extractor, from_extractor_with_state},
+    middleware::{from_extractor_with_state},
     routing::{delete, get, post},
     Router,
 };
