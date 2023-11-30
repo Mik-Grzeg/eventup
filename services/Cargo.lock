@@ -81,11 +81,15 @@ checksum = "a4668cab20f66d8d020e1fbc0ebe47217433c1b6c8f2040faf858554e394ace6"
 name = "appointments"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "auth_extractor",
  "axum",
+ "chrono",
  "config",
  "serde",
  "serde_json",
+ "sqlx",
+ "thiserror",
  "tokio",
  "tower-http",
  "tracing",

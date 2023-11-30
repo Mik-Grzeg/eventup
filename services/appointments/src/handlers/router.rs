@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{routing::get, Router};
 
 use crate::app_state::AppState;
@@ -9,7 +11,7 @@ pub fn router(app_state: AppState) -> Router {
     let health_route = Router::new().route("/health", get(super::health::health));
 
     let appointments_router = Router::new()
-        .route("/appointments", get(get_appointments::get_appointments))
+        .route("/appointments", get(get_appointments::get_appointments_for_user))
         .with_state(app_state);
 
     Router::new()

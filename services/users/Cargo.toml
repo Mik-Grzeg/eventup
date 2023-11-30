@@ -20,7 +20,7 @@ async-trait = "0.1.74"
 bcrypt = "0.15.0"
 rand = "0.8.5"
 chrono = { version = "0.4.31", features = ["serde"] }
-thiserror = "1.0.50"
+thiserror = { workspace = true }
 validator = { version = "0.16.1", features = ["derive", "phone"] }
 serde_json = "1.0.108"
 jsonwebtoken = "9.1.0"

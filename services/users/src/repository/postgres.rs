@@ -66,7 +66,7 @@ impl PgUserRepository {
             .connect(&config.pg_url)
             .await
             .expect("Failed to create PostgreSQL pool.");
-        tracing::info!("Initiated PosgreSQLG pool");
+        tracing::info!("Initiated PosgreSQL pool");
         Self::new(pool).await
     }
 }
