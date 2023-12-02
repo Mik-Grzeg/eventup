@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const AdminDashboard = () => {
+const UserDashboard = () => {
   const [services, setServices] = useState([]);
   const [serviceModalVisible, setServiceModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -66,7 +66,7 @@ const AdminDashboard = () => {
 
   return (
     <div>
-      <h1>Admin Dashboard</h1>
+      <h1>User Dashboard</h1>
 
       <button onClick={() => openServiceModal(null)}>Add Service</button>
 
@@ -101,4 +101,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default UserDashboard;

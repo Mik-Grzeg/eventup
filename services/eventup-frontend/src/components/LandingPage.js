@@ -1,11 +1,16 @@
 import React from 'react';
-import EventList from './AppointmentsList';
+import ServiceList from './ServiceList';
 
 const LandingPage = () => {
+  const handleMakeAppointment = (serviceId) => {
+    // Implement the logic to make an appointment using the serviceId
+    console.log(`Make appointment for service ID: ${serviceId}`);
+  };
+
   return (
     <div>
       <h1>Event Reservation App</h1>
-      <EventList />
+      <ServiceList onMakeAppointment={handleMakeAppointment} />
     </div>
   );
 };

@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import { Link, Routes } from 'react-router-dom'; // Update import statement
-
+import { Link, Routes, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/AuthContext'; // Update the import statement
 import axios from 'axios';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:9080/api/v1/auth/login', { email, password }); // Replace with your actual API endpoint
-      // Save the token in localStorage or a state management solution
+      const response = await axios.post('http://localhost:8080/api/v1/auth/login', { email, password });
+      login(response.data.token);
       console.log('Login successful. Token:', response.data.token);
-      // Redirect to the admin dashboard or handle it based on your application flow
+      // Redirect to the dashboard or handle it based on your application flow
+      navigate('/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
       // Handle login error (display an error message, etc.)
