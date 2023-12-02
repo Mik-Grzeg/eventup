@@ -1,11 +1,14 @@
 use async_trait::async_trait;
+use chrono::Utc;
 use sqlx::postgres::{PgPool, PgPoolOptions};
+use uuid::Uuid;
 
 use crate::config::AppConfig;
 use crate::types::appointments::AppointmentGet;
+use crate::types::services::{ServiceGet, ServicePost};
 
 use super::error::RepositoryError;
-use super::AppointmentRepository;
+use super::{AppointmentRepository, ServiceRepository};
 
 impl From<sqlx::Error> for RepositoryError {
     fn from(error: sqlx::Error) -> Self {
@@ -83,6 +86,56 @@ impl AppointmentRepository for PostgresRepo {
         user_identifiers: &common_types::UserIdentifiers,
         appointment_id: uuid::Uuid,
     ) -> Result<(), RepositoryError> {
+        unimplemented!()
+    }
+}
+
+#[async_trait]
+impl ServiceRepository for PostgresRepo {
+    async fn get_services(&self) -> Result<Vec<ServiceGet>, RepositoryError> {
+        Ok(sqlx::query_as::<_, ServiceGet>("SELECT * FROM service_id")
+            .fetch_all(&self.pool)
+            .await?)
+    }
+
+    async fn create_service(&self, service: ServicePost) -> Result<ServiceGet, RepositoryError> {
+        let uuid = Uuid::new_v4();
+        let now = Utc::now();
+        let duration = service.duration.into();
+
+        sqlx::query("INSERT INTO services (service_id, name, description, duration_interval, price, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)")
+        .bind(uuid)
+        .bind(service.name.clone())
+        .bind(service.description.clone())
+        .bind(duration)
+        .bind(service.price)
+        .bind(now)
+        .bind(now)
+        .execute(&self.pool)
+        .await?;
+
+        let service_get = ServiceGet {
+            service_id: uuid,
+            name: service.name,
+            description: service.description,
+            duration,
+            price: service.price,
+            updated_at: now,
+            created_at: now,
+        };
+
+        Ok(service_get)
+    }
+
+    async fn update_service(
+        &self,
+        service: crate::types::services::ServicePut,
+        service_id: uuid::Uuid,
+    ) -> Result<Option<ServiceGet>, RepositoryError> {
+        unimplemented!()
+    }
+
+    async fn delete_service(&self, service_id: uuid::Uuid) -> Result<(), RepositoryError> {
         unimplemented!()
     }
 }

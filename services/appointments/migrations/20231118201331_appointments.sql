@@ -2,8 +2,13 @@ CREATE TABLE IF NOT EXISTS services (
   service_id UUID PRIMARY KEY,
   -- company_id UUID NOT NULL,
   name TEXT NOT NULL,
-  duration interval NOT NULL,
-  price MONEY NOT NULL
+  description TEXT,
+  duration_in_sec INT NOT NULL,
+  price FLOAT4 NOT NULL
+
+  -- metadata about the edit history
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
 );
 
 CREATE TABLE IF NOT EXISTS appointments (

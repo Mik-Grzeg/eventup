@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 uuid = { workspace = true, features = ["serde", "v4"] }
 serde = { workspace = true, features = ["derive"] }
+sqlx = { workspace = true, features = ["macros"] }

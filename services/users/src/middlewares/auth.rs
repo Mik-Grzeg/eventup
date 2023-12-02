@@ -68,6 +68,7 @@ where
         let user_identifiers = UserIdentifiers {
             email: token.claims.sub,
             id: token.claims.id,
+            role: token.claims.role
         };
         Ok(RequireAuth(user_identifiers))
     }

@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use error::RepositoryError;
 
-use crate::types::appointments::{AppointmentGet, AppointmentPost, AppointmentPut};
+use crate::types::{appointments::{AppointmentGet, AppointmentPost, AppointmentPut}, services::{ServicePut, ServiceGet, ServicePost}};
 
 pub mod error;
 pub mod postgres;
@@ -88,5 +88,37 @@ impl<AR: AppointmentRepository + ?Sized + 'static> AppointmentRepository for Arc
         self.as_ref()
             .delete_appointment(user_identifiers, appointment_id)
             .await
+    }
+}
+
+#[async_trait]
+pub trait ServiceRepository: Send + Sync {
+    async fn get_services(&self) -> Result<Vec<ServiceGet>, RepositoryError>;
+    async fn create_service(&self, service: ServicePost) -> Result<ServiceGet, RepositoryError>;
+    async fn update_service(
+        &self,
+        service: ServicePut,
+        service_id: Uuid
+    ) -> Result<Option<ServiceGet>, RepositoryError>;
+    async fn delete_service(&self, service_id: Uuid) -> Result<(), RepositoryError>;
+}
+
+#[async_trait]
+impl<SR: ServiceRepository + ?Sized + 'static> ServiceRepository for Arc<SR> {
+    async fn get_services(&self) -> Result<Vec<ServiceGet>, RepositoryError> {
+        self.as_ref().get_services().await
+    }
+    async fn create_service(&self, service: ServicePost) -> Result<ServiceGet, RepositoryError> {
+        self.as_ref().create_service(service).await
+    }
+    async fn update_service(
+        &self,
+        service: ServicePut,
+        service_id: Uuid
+    ) -> Result<Option<ServiceGet>, RepositoryError> {
+        self.as_ref().update_service(service, service_id).await
+    }
+    async fn delete_service(&self, service_id: Uuid) -> Result<(), RepositoryError> {
+        self.as_ref().delete_service(service_id).await
     }
 }

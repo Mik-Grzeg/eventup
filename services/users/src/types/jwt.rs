@@ -5,7 +5,7 @@ use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, 
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use common_types::UserIdentifiers;
+use common_types::{UserIdentifiers, UserRoles};
 
 #[derive(Serialize, Debug)]
 pub struct LoginTokenRespone {
@@ -53,6 +53,7 @@ impl FromStr for TokenType {
 pub struct JWTClaims {
     pub sub: String,
     pub id: Uuid,
+    pub role: UserRoles,
     pub exp: i64,
 }
 
@@ -60,6 +61,7 @@ pub fn generate_jwt_token(user: &UserIdentifiers, secret: &str) -> String {
     let claims = JWTClaims {
         sub: user.email.clone(),
         id: user.id,
+        role: user.role.clone(),
         exp: (chrono::Utc::now() + chrono::Duration::hours(1)).timestamp(),
     };
 

@@ -43,7 +43,6 @@ where
     type Rejection = StatusCode;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        println!("MURVA JAZDA");
         let Some(auth_header) = parts
             .headers
             .get(header::AUTHORIZATION)

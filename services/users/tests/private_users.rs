@@ -101,6 +101,27 @@ async fn test_proper_lifecycle(pool: PgPool) {
         token.unwrap().as_str().unwrap()
     );
 
+    // Access controll
+    let response = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri(format!("/api/v1/auth/access"))
+                .header(http::header::AUTHORIZATION, &auth_header)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+    assert_eq!(StatusCode::OK, response.status());
+
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let body: Value = serde_json::from_slice(&body).unwrap();
+
+    assert_eq!(body.get("email").unwrap().as_str(), Some("user@mail.com"));
+    assert_eq!(body.get("role").unwrap().as_str(), Some("regular"));
+    assert_eq!(body.get("id").unwrap().as_str(), Some(user_id.to_string().as_str()));
+
     // GET the user by ID
     let response = app
         .clone()

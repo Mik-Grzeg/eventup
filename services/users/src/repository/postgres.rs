@@ -3,9 +3,9 @@ use crate::repository::{error::RepositoryError, UserRepository};
 use crate::types::users::{
     generate_random_salt, update_user_account, UserCredentials, UserPasswordsPair,
 };
-use common_types::UserIdentifiers;
 use crate::types::users::{UserAccountPut, UserGet, UserPost};
 use chrono::Utc;
+use common_types::UserIdentifiers;
 
 use async_trait::async_trait;
 use bcrypt::{hash_with_salt, verify, DEFAULT_COST};
@@ -30,7 +30,7 @@ pub struct PgUserRepository {
 
     // queries
     get_user_by_id_query: String,
-    get_user_passwd_query: String,
+    get_user_passwd_and_role_query: String,
 }
 
 impl PgUserRepository {
@@ -50,13 +50,13 @@ impl PgUserRepository {
         "#
         .to_owned();
 
-        let get_user_passwd_query =
-            r#"SELECT password_hashed, password_salt, user_id, email FROM user_log_infos WHERE email = $1"#.to_owned();
+        let get_user_passwd_and_role_query =
+            r#"SELECT password_hashed, password_salt, user_id, email, role FROM user_log_infos WHERE email = $1"#.to_owned();
 
         Self {
             pool,
             get_user_by_id_query,
-            get_user_passwd_query,
+            get_user_passwd_and_role_query,
         }
     }
 
@@ -83,7 +83,7 @@ impl UserRepository for PgUserRepository {
     ) -> Result<Option<UserIdentifiers>, RepositoryError> {
         let UserCredentials { email, password } = user_credentials;
         let Some((user_passswords_pair, user_identifiers)) =
-            sqlx::query(&self.get_user_passwd_query)
+            sqlx::query(&self.get_user_passwd_and_role_query)
                 .bind(email)
                 .map(
                     |row: PgRow| -> Result<(UserPasswordsPair, UserIdentifiers), RepositoryError> {
@@ -95,6 +95,7 @@ impl UserRepository for PgUserRepository {
                             UserIdentifiers {
                                 email: row.try_get("email")?,
                                 id: row.try_get("user_id")?,
+                                role: row.try_get("role")?,
                             },
                         ))
                     },
