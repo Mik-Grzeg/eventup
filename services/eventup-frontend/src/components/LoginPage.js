@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Routes, Route } from 'react-router-dom'; // Update import statement
+import { Link, Routes } from 'react-router-dom'; // Update import statement
 
 import axios from 'axios';
 
