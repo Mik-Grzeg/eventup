@@ -8,6 +8,16 @@ include:
   - ./docker/clickhouse/cluster_2s_2r/docker-compose.yaml
 services:
 
+  # Frontend
+  frontend:
+    build:
+      dockerfile: docker/Dockerfile.frontend
+    container_name: frontend
+    volumes:
+      - ./services/eventup-frontend/src:/app/src
+    ports: 
+      - 3000:3000
+
   postgres-migrator:
     build:
       dockerfile: docker/Dockerfile.migrator
@@ -65,6 +75,7 @@ services:
     links: 
       - appointments-api
       - users-api
+      - frontend
 
 
   # For OLTP workload
