@@ -15,8 +15,6 @@ services:
     container_name: frontend
     volumes:
       - ./services/eventup-frontend/src:/app/src
-    ports: 
-      - 3000:3000
 
   postgres-migrator:
     build:
