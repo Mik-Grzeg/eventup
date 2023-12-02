@@ -15,7 +15,7 @@ const LoginPage = () => {
       login(response.data.token);
       console.log('Login successful. Token:', response.data.token);
       // Redirect to the dashboard or handle it based on your application flow
-      navigate('/dashboard');
+      navigate('/UserDashboard');
     } catch (error) {
       console.error('Login failed:', error);
       // Handle login error (display an error message, etc.)
