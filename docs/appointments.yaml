@@ -20,13 +20,14 @@ paths:
                 name:
                   type: string
                   description: The name of the service
-                duration:
+                description:
                   type: string
-                  format: duration
-                  description: The duration of the service
+                  description: The description of the service
+                duration_in_sec:
+                  type: int
+                  description: The duration of the service in seconds
                 price:
-                  type: string
-                  format: money
+                  type: number
                   description: The price of the service
       responses:
         '201':
@@ -188,13 +189,14 @@ components:
         name:
           type: string
           description: The name of the service
-        duration:
+        description:
           type: string
-          format: duration
-          description: The duration of the service
+          description: The description of the service
+        duration_in_sec:
+          type: int
+          description: The duration of the service in seconds
         price:
-          type: string
-          format: money
+          type: number
           description: The price of the service
 
     Appointment:
