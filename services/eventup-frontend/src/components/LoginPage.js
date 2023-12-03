@@ -7,14 +7,12 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState(null);
-  const { login, isAdmin, isRegularUser } = useAuth();
+  const { login, isAdmin, isRegularUser, isEmployee } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       const response = await axios.post('http://localhost:8080/api/v1/auth/login', { email, password });
-
-      // Wait for the login function to complete before continuing
       const userRole = await login(response.data.token);
 
       console.log('Authentication successful. Token:', response.data.token);
@@ -27,6 +25,9 @@ const LoginPage = () => {
       } else if (userRole === 'regular') {
         navigate('/dashboard');
         console.log('Navigating to /dashboard');
+      } else if (userRole === 'employee') {
+        navigate('/employee');
+        console.log('Navigating to /employee');
       } else {
         navigate('/');
         console.log('Navigating to /');

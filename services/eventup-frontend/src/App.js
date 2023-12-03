@@ -6,9 +6,10 @@ import AdminDashboard from './components/AdminDashboard';
 import LoginPage from './components/LoginPage';
 import RegistrationPage from './components/RegistrationPage';
 import UserDashboard from './components/UserDashboard';
+import EmployeeDashboard from './components/EmployeeDashboard';
 
 const App = () => {
-  const { isAuthenticated, isAdmin, isRegularUser } = useAuth();
+  const { isAuthenticated, isAdmin, isRegularUser, isEmployee } = useAuth();
 
   return (
     <Router>
@@ -24,6 +25,10 @@ const App = () => {
           path="/dashboard"
           element={isRegularUser() ? <UserDashboard /> : <Navigate to="/login" />}
         />
+        <Route
+          path="/employee"
+          element={isEmployee() ? <UserDashboard /> : <Navigate to="/login" />}
+        />        
       </Routes>
     </Router>
   );

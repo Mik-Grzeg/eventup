@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../hooks/AuthContext';
 import Logout from './Logout';
+import EmployeeManagement from './EmployeeManagement'; 
 
 const ServiceTable = ({ services, toggleServiceVisibility, handleEditService }) => {
   const { isAdmin } = useAuth();
@@ -195,6 +196,7 @@ const AdminDashboard = () => {
           <button onClick={() => setServiceModalVisible(false)}>Cancel</button>
         </div>
       )}
+      <EmployeeManagement />
     </div>
   );
 };
