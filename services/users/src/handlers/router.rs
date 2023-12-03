@@ -19,20 +19,19 @@ pub fn router(app_state: AppState) -> Router {
                 .put(put_user::update_user)
                 .get(get_user::get_user),
         )
-        .route("/", post(post_user::create_user))
-        .route_layer(from_extractor_with_state::<Authorization, AppState>(
-            app_state.clone(),
-        ))
-        .with_state(app_state.clone());
+        .route("/", post(post_user::create_user));
 
     let auth_routers = Router::new()
         .route("/login", post(login::login))
-        .route("/access", get(access_control::access_control))
-        .with_state(app_state);
+        .route("/access", get(access_control::access_control));
 
     let api_routes = Router::new()
         .nest("/users", user_routers)
-        .nest("/auth", auth_routers);
+        .nest("/auth", auth_routers)
+        .route_layer(from_extractor_with_state::<Authorization, AppState>(
+            app_state.clone(),
+        ))
+        .with_state(app_state);
 
     Router::new()
         .nest("/api/v1", api_routes)

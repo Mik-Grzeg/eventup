@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 pub mod authorization_client;
 
-#[cfg(feature = "test-utils")]
+#[cfg(any(test, feature = "test-utils"))]
 pub mod mock;
 
 #[async_trait]
@@ -43,7 +43,6 @@ where
             .authorize(auth_header)
             .await?;
 
-        tracing::error!("PLZ HELP ME KEK");
         Ok(AuthorizationControl(user_identifiers))
     }
 }

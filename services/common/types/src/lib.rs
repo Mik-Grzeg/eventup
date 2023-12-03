@@ -16,7 +16,7 @@ impl UserRoles {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct UserIdentifiers {
     pub id: Uuid,
     pub email: String,

@@ -356,8 +356,11 @@ dependencies = [
  "httpmock",
  "reqwest",
  "serde_json",
+ "tokio",
+ "tower",
  "tracing",
  "types",
+ "uuid",
 ]
 
 [[package]]

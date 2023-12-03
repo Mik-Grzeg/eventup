@@ -31,7 +31,6 @@ impl std::ops::Deref for AuthorizationClient {
 #[async_trait]
 impl Authorizable for AuthorizationClient {
     async fn authorize(&self, auth_header: &str) -> Result<Option<UserIdentifiers>, StatusCode> {
-        tracing::error!("CALLED ONCE");
         let response = self
             .get(self.url.as_str())
             .header(reqwest::header::AUTHORIZATION, auth_header)

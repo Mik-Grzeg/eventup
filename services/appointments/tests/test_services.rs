@@ -37,7 +37,6 @@ async fn test_creating_service_by_admin(pool: PgPool) {
     init_tracing();
 
     access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
-    access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     // POST a new active service
     let response = app
         .clone()
@@ -62,7 +61,6 @@ async fn test_creating_service_by_admin(pool: PgPool) {
         .unwrap();
     assert_eq!(StatusCode::CREATED, response.status());
 
-    access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     // POST a new inactive service
     let response = app
@@ -90,7 +88,6 @@ async fn test_creating_service_by_admin(pool: PgPool) {
     assert_eq!(StatusCode::CREATED, response.status());
 
     // View as admin
-    access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     // GET check if both services were created properly the services
     let response = app
@@ -234,6 +231,8 @@ async fn test_updating_service_by_regular_user(pool: PgPool) {
         .await
         .unwrap();
     assert_eq!(StatusCode::CREATED, response.status());
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let body: ServiceGet = serde_json::from_slice(&body).unwrap();
 
     access.set_get_identifiers_return(Ok(Some(regular_user_identifiers())));
     // PUT update service
@@ -241,7 +240,7 @@ async fn test_updating_service_by_regular_user(pool: PgPool) {
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/api/v1/services")
+                .uri(format!("/api/v1/services/{}", body.service_id))
                 .method(Method::PUT)
                 .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .header(http::header::AUTHORIZATION, "")
@@ -292,6 +291,8 @@ async fn test_updating_service_by_admin_user(pool: PgPool) {
         .await
         .unwrap();
     assert_eq!(StatusCode::CREATED, response.status());
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let body: ServiceGet = serde_json::from_slice(&body).unwrap();
 
     access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     // PUT update service
@@ -299,7 +300,7 @@ async fn test_updating_service_by_admin_user(pool: PgPool) {
         .clone()
         .oneshot(
             Request::builder()
-                .uri("/api/v1/services")
+                .uri(format!("/api/v1/services/{}", body.service_id))
                 .method(Method::PUT)
                 .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .header(http::header::AUTHORIZATION, "")
@@ -317,18 +318,17 @@ async fn test_updating_service_by_admin_user(pool: PgPool) {
     assert_eq!(StatusCode::OK, response.status());
 
     let body = response.into_body().collect().await.unwrap().to_bytes();
-    let services: Vec<ServiceGet> = serde_json::from_slice(&body).unwrap();
+    let service: ServiceGet = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(services.len(), 1);
     // Check price of the service
-    assert_eq!(services[0].duration_in_sec, 60 * 30);
+    assert_eq!(service.duration_in_sec, 60 * 30);
 
     // Check updated name of the service
-    assert_eq!(services[0].name, "New Test active service");
+    assert_eq!(service.name, "New Test active service");
 
-    // Check prices of both services
-    assert_eq!(services[0].price, 37.0);
+    // Check prices of the services
+    assert_eq!(service.price, 37.0);
 
-    // Check activity of both services
-    assert!(services[1].active);
+    // Check activity of the services
+    assert!(service.active);
 }
