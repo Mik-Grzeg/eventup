@@ -93,7 +93,7 @@ impl AppointmentRepository for PostgresRepo {
 #[async_trait]
 impl ServiceRepository for PostgresRepo {
     async fn get_services(&self) -> Result<Vec<ServiceGet>, RepositoryError> {
-        Ok(sqlx::query_as::<_, ServiceGet>("SELECT * FROM service_id")
+        Ok(sqlx::query_as::<_, ServiceGet>("SELECT * FROM services")
             .fetch_all(&self.pool)
             .await?)
     }
@@ -101,13 +101,12 @@ impl ServiceRepository for PostgresRepo {
     async fn create_service(&self, service: ServicePost) -> Result<ServiceGet, RepositoryError> {
         let uuid = Uuid::new_v4();
         let now = Utc::now();
-        let duration = service.duration.into();
 
-        sqlx::query("INSERT INTO services (service_id, name, description, duration_interval, price, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)")
+        sqlx::query("INSERT INTO services (service_id, name, description, duration_in_sec, price, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)")
         .bind(uuid)
         .bind(service.name.clone())
         .bind(service.description.clone())
-        .bind(duration)
+        .bind(service.duration_in_sec)
         .bind(service.price)
         .bind(now)
         .bind(now)
@@ -118,7 +117,7 @@ impl ServiceRepository for PostgresRepo {
             service_id: uuid,
             name: service.name,
             description: service.description,
-            duration,
+            duration_in_sec: service.duration_in_sec,
             price: service.price,
             updated_at: now,
             created_at: now,

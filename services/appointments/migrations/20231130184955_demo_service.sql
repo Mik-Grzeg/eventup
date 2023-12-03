@@ -1,5 +1,5 @@
 -- Add migration script here
-INSERT INTO services (service_id, name, duration, price) VALUES ('00000000-0000-0000-0000-000000000001', 'skiing lesson', '1 hour', 120.0);
+INSERT INTO services (service_id, name, duration_in_sec, price, created_at, updated_at) VALUES ('00000000-0000-0000-0000-000000000001', 'skiing lesson', 3600, 120.0, '2023-12-01 07:00:10.000000+00', '2023-12-01 07:00:10.000000+00');
 INSERT INTO appointments (
   appointment_id,
   service_id,

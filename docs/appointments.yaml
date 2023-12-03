@@ -1,24 +1,26 @@
 openapi: "3.0.0"
 info:
-  title: Appointment Management API
+  title: appointment management api
   version: 1.0.0
 paths:
   /services:
     get:
-      summary: Get services detail
+      summary: get services detail
       responses:
         '200':
-          description: Successful operation
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Service"
+                $ref: "#/components/schemas/service"
         '404':
-          description: Service not found
+          description: service not found
 
     post:
-      summary: Create a new service
-      requestBody:
+      summary: create a new service
+      security:
+        - bearerAuth: []
+      requestbody:
         required: true
         content:
           application/json:
@@ -28,233 +30,233 @@ paths:
                 company_id:
                   type: string
                   format: uuid
-                  description: The ID of the company offering the service
+                  description: the id of the company offering the service
                 name:
                   type: string
-                  description: The name of the service
+                  description: the name of the service
                 description:
                   type: string
-                  description: The description of the service
+                  description: the description of the service
                 duration_in_sec:
                   type: int
-                  description: The duration of the service in seconds
+                  description: the duration of the service in seconds
                 price:
                   type: number
-                  description: The price of the service
+                  description: the price of the service
       responses:
         '201':
-          description: Service created successfully
+          description: service created successfully
         '400':
-          description: Bad request
+          description: bad request
 
   /services/{service_id}:
     put:
-      summary: Update service details by service ID
+      summary: update service details by service id
       parameters:
         - name: service_id
           in: path
           required: true
-          description: ID of the service to update
+          description: id of the service to update
           schema:
             type: string
             format: uuid
-      requestBody:
+      requestbody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Service"
+              $ref: "#/components/schemas/service"
       responses:
         '200':
-          description: Successful operation
+          description: successful operation
         '400':
-          description: Bad request
+          description: bad request
         '404':
-          description: Service not found
+          description: service not found
 
     delete:
-      summary: Delete service by service ID
+      summary: delete service by service id
       parameters:
         - name: service_id
           in: path
           required: true
-          description: ID of the service to delete
+          description: id of the service to delete
           schema:
             type: string
             format: uuid
       responses:
         '204':
-          description: Service deleted successfully
+          description: service deleted successfully
         '404':
-          description: Service not found
+          description: service not found
 
   /appointments:
     post:
-      summary: Create a new appointment
-      requestBody:
+      summary: create a new appointment
+      requestbody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Appointment"
+              $ref: "#/components/schemas/appointment"
       responses:
         '201':
-          description: Appointment created successfully
+          description: appointment created successfully
         '400':
-          description: Bad request
+          description: bad request
 
   /appointments/{appointment_id}:
     get:
-      summary: Get appointment details by appointment ID
+      summary: get appointment details by appointment id
       parameters:
         - name: appointment_id
           in: path
           required: true
-          description: ID of the appointment to retrieve
+          description: id of the appointment to retrieve
           schema:
             type: string
             format: uuid
       responses:
         '200':
-          description: Successful operation
+          description: successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Appointment"
+                $ref: "#/components/schemas/appointment"
         '404':
-          description: Appointment not found
+          description: appointment not found
 
     put:
-      summary: Update appointment details by appointment ID
+      summary: update appointment details by appointment id
       parameters:
         - name: appointment_id
           in: path
           required: true
-          description: ID of the appointment to update
+          description: id of the appointment to update
           schema:
             type: string
             format: uuid
-      requestBody:
+      requestbody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Appointment"
+              $ref: "#/components/schemas/appointment"
       responses:
         '200':
-          description: Successful operation
+          description: successful operation
         '400':
-          description: Bad request
+          description: bad request
         '404':
-          description: Appointment not found
+          description: appointment not found
 
     delete:
-      summary: Delete appointment by appointment ID
+      summary: delete appointment by appointment id
       parameters:
         - name: appointment_id
           in: path
           required: true
-          description: ID of the appointment to delete
+          description: id of the appointment to delete
           schema:
             type: string
             format: uuid
       responses:
         '204':
-          description: Appointment deleted successfully
+          description: appointment deleted successfully
         '404':
-          description: Appointment not found
+          description: appointment not found
 
 components:
   schemas:
-    Service:
+    service:
       type: object
       properties:
         service_id:
           type: string
           format: uuid
-          readOnly: true
-          description: The unique identifier for a service
+          readonly: true
+          description: the unique identifier for a service
         company_id:
           type: string
           format: uuid
-          description: The ID of the company offering the service
+          description: the id of the company offering the service
         name:
           type: string
-          description: The name of the service
+          description: the name of the service
         description:
           type: string
-          description: The description of the service
+          description: the description of the service
         duration_in_sec:
           type: int
-          description: The duration of the service in seconds
+          description: the duration of the service in seconds
         price:
           type: number
-          description: The price of the service
+          description: the price of the service
 
-    Appointment:
+    appointment:
       type: object
       properties:
         appointment_id:
           type: string
           format: uuid
-          readOnly: true
-          description: The unique identifier for an appointment
+          readonly: true
+          description: the unique identifier for an appointment
         company_id:
           type: string
           format: uuid
-          description: The ID of the company where the appointment is scheduled
+          description: the id of the company where the appointment is scheduled
         service_id:
           type: string
           format: uuid
-          description: The ID of the service associated with the appointment
+          description: the id of the service associated with the appointment
         created_at:
           type: string
           format: date-time
-          readOnly: true
-          description: The timestamp when the appointment was created
+          readonly: true
+          description: the timestamp when the appointment was created
         updated_at:
           type: string
           format: date-time
-          readOnly: true
-          description: The timestamp when the appointment was last updated
+          readonly: true
+          description: the timestamp when the appointment was last updated
         client_id:
           type: string
           format: uuid
-          description: The ID of the client for the appointment
+          description: the id of the client for the appointment
         employee_id:
           type: string
           format: uuid
-          description: The ID of the employee handling the appointment
+          description: the id of the employee handling the appointment
         client_name:
           type: string
-          description: The name of the client
+          description: the name of the client
         start_time:
           type: string
           format: date-time
-          description: The start time of the appointment
+          description: the start time of the appointment
         end_time:
           type: string
           format: date-time
-          description: The end time of the appointment
+          description: the end time of the appointment
         price_expected:
           type: string
           format: money
-          description: The expected price for the service
+          description: the expected price for the service
         price_final:
           type: string
           format: money
-          description: The final price for the service
+          description: the final price for the service
         discount:
           type: number
           format: decimal
-          description: The discount applied to the service price
+          description: the discount applied to the service price
         canceled:
           type: boolean
-          description: Indicates whether the appointment has been canceled
+          description: indicates whether the appointment has been canceled
         cancellation_reason:
           type: string
-          description: The reason for canceling the appointment
+          description: the reason for canceling the appointment
         provided:
           type: boolean
-          description: Indicates whether the service has been provided
+          description: indicates whether the service has been provided
 
