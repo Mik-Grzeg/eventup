@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Link, Routes, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/AuthContext'; // Update the import statement
+import { Link, useNavigate } from 'react-router-dom'; // Remove Routes
+import { useAuth } from '../hooks/AuthContext';
 import axios from 'axios';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const [loginError, setLoginError] = useState(null);
+  const { login, isAdmin, isRegularUser } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -14,11 +15,17 @@ const LoginPage = () => {
       const response = await axios.post('http://localhost:8080/api/v1/auth/login', { email, password });
       login(response.data.token);
       console.log('Login successful. Token:', response.data.token);
-      // Redirect to the dashboard or handle it based on your application flow
-      navigate('/UserDashboard');
+
+      if (isAdmin()) {
+        navigate('/admin');
+      } else if (isRegularUser()) {
+        navigate('/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       console.error('Login failed:', error);
-      // Handle login error (display an error message, etc.)
+      setLoginError('Incorrect username or password');
     }
   };
 
@@ -34,15 +41,10 @@ const LoginPage = () => {
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
       <button onClick={handleLogin}>Login</button>
+      {loginError && <div style={{ color: 'red' }}>{loginError}</div>}
       <p>
         Don't have an account? <Link to="/register">Register here</Link>
       </p>
-
-      {/* Define your routes here */}
-      <Routes>
-        {/* Example Route */}
-        {/* <Route path="/example" element={<ExampleComponent />} /> */}
-      </Routes>
     </div>
   );
 };
