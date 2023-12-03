@@ -56,8 +56,8 @@ paths:
                     type: string
                     format: UUID
                   role:
-                    type string
-                  enum: [admin, regular]
+                    type: string
+                    enum: [admin, regular]
 
 
         '400':

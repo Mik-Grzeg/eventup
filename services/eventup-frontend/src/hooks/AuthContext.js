@@ -1,22 +1,68 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(() => {
+    // Initialize token from sessionStorage or other secure storage
+    return sessionStorage.getItem('token') || null;
+  });
 
-  const login = (newToken) => {
+  const [userRole, setUserRole] = useState(null);
+  const navigate = useNavigate(); // React Router's useNavigate hook
+
+  const login = async (newToken) => {
     setToken(newToken);
-    // You may also want to save the token to localStorage or a secure storage solution
+    // Save the token to sessionStorage or other secure storage
+    sessionStorage.setItem('token', newToken);
+
+    // Fetch user role after login
+    await fetchUserRole();
+
+    // Redirect based on user role
+    if (isAdmin()) {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const logout = () => {
     setToken(null);
-    // You may also want to remove the token from localStorage or storage
+    setUserRole(null);
+    // Remove the token from sessionStorage or other secure storage
+    sessionStorage.removeItem('token');
+    // Redirect to the login page after logout
+    navigate('/login');
   };
 
+  const fetchUserRole = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/api/v1/auth/access', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUserRole(response.data.role);
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchUserRole();
+    }
+  }, [token]);
+
+  const isAdmin = () => userRole === 'admin';
+  const isRegularUser = () => userRole === 'regular';
+
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, userRole, login, logout, isAdmin, isRegularUser }}>
       {children}
     </AuthContext.Provider>
   );
