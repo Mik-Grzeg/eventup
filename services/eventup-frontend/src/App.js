@@ -27,7 +27,7 @@ const App = () => {
         />
         <Route
           path="/employee"
-          element={isEmployee() ? <UserDashboard /> : <Navigate to="/login" />}
+          element={isEmployee() ? <EmployeeDashboard /> : <Navigate to="/login" />}
         />        
       </Routes>
     </Router>
