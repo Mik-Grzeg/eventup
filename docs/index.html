@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Documentation</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #path-selector {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 999999;
+        }
+    </style>
+</head>
+<body>
+<select id="path-selector"></select>
+<redoc id="redoc" spec-url></redoc>
+<script>
+  const selectorInput = document.getElementById('path-selector')
+  const urlParams = new URLSearchParams(window.location.search)
+  const specPath = urlParams.get('path')
+  const groups = {};
+
+  function changePathParam (path) {
+    window.location.search = `path=${path}`
+  }
+
+  function bindSelector () {
+    selectorInput.addEventListener('change', function (event) {
+      changePathParam(event.target.value)
+    })
+  }
+
+  function updateSelectOptions (options) {
+    options.forEach(function (path) {
+      const isSelected = path === specPath
+
+      selectorInput.options.add(new Option(path, path, false, isSelected))
+    })
+  }
+
+  function updateSpec (spec) {
+    document.getElementById('redoc').setAttribute('spec-url', spec)
+  }
+
+  function loadPaths () {
+    if (specPath) {
+      updateSpec(specPath)
+    }
+
+    fetch('meta.json').then(function (response) {
+      return response.json()
+    }).then(function (paths) {
+      if (!specPath) {
+        changePathParam(paths[0])
+      }
+
+      updateSelectOptions(paths)
+    })
+  }
+
+  bindSelector()
+  loadPaths()
+</script>
+<script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"></script>
+</body>
+</html>

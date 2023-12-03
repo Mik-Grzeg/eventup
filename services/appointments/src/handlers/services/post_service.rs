@@ -15,13 +15,13 @@ pub async fn post_service(
     AuthExtractor(user_identifiers): AuthExtractor,
     State(service_repository): State<Arc<dyn ServiceRepository>>,
     Json(service): Json<ServicePost>,
-) -> Result<(StatusCode, Json<Option<ServiceGet>>), PublicError> {
+) -> Result<(StatusCode, Json<ServiceGet>), PublicError> {
     if user_identifiers.role != UserRoles::Admin {
-        return Ok((StatusCode::UNAUTHORIZED, Json(None)));
+        return Err(PublicError::Unauthorized);
     }
 
     service.validate()?;
 
     let service = service_repository.create_service(service).await?;
-    Ok((StatusCode::CREATED, Json(Some(service))))
+    Ok((StatusCode::CREATED, Json(service)))
 }

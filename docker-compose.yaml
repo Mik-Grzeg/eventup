@@ -147,14 +147,10 @@ services:
       - redpanda-0
     profiles: ["log"]
 
-  # Swagger UI
-  swagger-ui:
-    image: swaggerapi/swagger-ui
-    container_name: api-docs 
-    ports:
-      - "8089:8080"
-    environment:
-      - SWAGGER_JSON=/usr/share/nginx/html/swagger.json
+  # API docs
+  docs:
+    image: nginx:1.21-alpine
     volumes:
-      - ./swagger.json:/usr/share/nginx/html/swagger.json:ro
-
+      - ./docs/:/usr/share/nginx/html/:rw
+    ports:
+      - 9601:80

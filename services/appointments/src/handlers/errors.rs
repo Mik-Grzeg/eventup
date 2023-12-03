@@ -15,6 +15,8 @@ pub enum PublicError {
         #[from]
         source: ValidationErrors,
     },
+    #[error("Unauthorized")]
+    Unauthorized,
 }
 
 impl IntoResponse for PublicError {
@@ -27,6 +29,7 @@ impl IntoResponse for PublicError {
                 tracing::error!("{source}");
                 (StatusCode::BAD_REQUEST, source.to_string())
             }
+            Self::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".into()),
         }
         .into_response()
     }
