@@ -16,6 +16,7 @@ pub async fn post_service(
     State(service_repository): State<Arc<dyn ServiceRepository>>,
     Json(service): Json<ServicePost>,
 ) -> Result<(StatusCode, Json<ServiceGet>), PublicError> {
+    tracing::debug!("identifiers = {user_identifiers:?}");
     match user_identifiers {
         Some(identifiers) if identifiers.role == UserRoles::Admin => {
             service.validate()?;

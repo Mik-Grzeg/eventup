@@ -32,10 +32,11 @@ async fn test_creating_service_by_admin(pool: PgPool) {
     let app_state = AppState::new(pool)
         .await
         .with_access_control(access.clone());
-    let app = router(app_state.clone());
+    let app = router(app_state);
 
     init_tracing();
 
+    access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     // POST a new active service
     let response = app
@@ -61,6 +62,7 @@ async fn test_creating_service_by_admin(pool: PgPool) {
         .unwrap();
     assert_eq!(StatusCode::CREATED, response.status());
 
+    access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     // POST a new inactive service
     let response = app
@@ -89,6 +91,7 @@ async fn test_creating_service_by_admin(pool: PgPool) {
 
     // View as admin
     access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
+    access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     // GET check if both services were created properly the services
     let response = app
         .clone()
@@ -108,22 +111,23 @@ async fn test_creating_service_by_admin(pool: PgPool) {
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let services: Vec<ServiceGet> = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(services.len(), 2);
+    // One appointement is already in database as demo data
+    assert_eq!(services.len(), 3);
     // Check prices of both services
-    assert_eq!(services[0].duration_in_sec, 60 * 30);
-    assert_eq!(services[1].duration_in_sec, 60 * 60);
+    assert_eq!(services[1].duration_in_sec, 60 * 30);
+    assert_eq!(services[2].duration_in_sec, 60 * 60);
 
     // Check names of both services
-    assert_eq!(services[0].name, "Test active service");
-    assert_eq!(services[1].name, "Test inactive service");
+    assert_eq!(services[1].name, "Test active service");
+    assert_eq!(services[2].name, "Test inactive service");
 
     // Check prices of both services
-    assert_eq!(services[0].price, 100.0);
     assert_eq!(services[1].price, 10.0);
+    assert_eq!(services[2].price, 100.0);
 
     // Check activity of both services
     assert!(services[1].active);
-    assert!(!services[0].active);
+    assert!(!services[2].active);
 
     // View as regular user
     access.set_get_identifiers_return(Ok(Some(regular_user_identifiers())));
@@ -146,18 +150,18 @@ async fn test_creating_service_by_admin(pool: PgPool) {
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let services: Vec<ServiceGet> = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(services.len(), 1);
+    assert_eq!(services.len(), 2);
     // Check price of active service
-    assert_eq!(services[0].duration_in_sec, 60 * 30);
+    assert_eq!(services[1].duration_in_sec, 60 * 30);
 
     // Check name of active services
-    assert_eq!(services[0].name, "Test active service");
+    assert_eq!(services[1].name, "Test active service");
 
     // Check price of ative services
-    assert_eq!(services[0].price, 100.0);
+    assert_eq!(services[1].price, 10.0);
 
     // Check activity of active services
-    assert!(!services[0].active);
+    assert!(services[1].active);
 }
 
 #[sqlx::test]

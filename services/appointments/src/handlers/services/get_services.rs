@@ -13,8 +13,12 @@ pub async fn get_services(
 ) -> Result<Json<Vec<ServiceGet>>, PublicError> {
     match user_identifiers {
         Some(identifiers) if identifiers.role == UserRoles::Admin => {
+            tracing::info!("services requested by admin");
             Ok(Json(service_repository.get_all_services().await?))
         }
-        _ => Ok(Json(service_repository.get_active_services().await?)),
+        _ => {
+            tracing::info!("services requested by regular");
+            Ok(Json(service_repository.get_active_services().await?))
+        }
     }
 }

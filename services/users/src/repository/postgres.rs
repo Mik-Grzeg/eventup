@@ -39,6 +39,7 @@ impl PgUserRepository {
             SELECT 
                 ul.user_id user_id,
                 ul.email email,
+                ul.role role,
                 ua.phone_number phone_number,
                 ua.first_name first_name,
                 ua.last_name last_name, 

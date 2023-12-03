@@ -43,6 +43,7 @@ where
             .authorize(auth_header)
             .await?;
 
+        tracing::error!("PLZ HELP ME KEK");
         Ok(AuthorizationControl(user_identifiers))
     }
 }

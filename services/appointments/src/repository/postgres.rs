@@ -83,7 +83,7 @@ impl AppointmentRepository for PostgresRepo {
             .map_err(|err| RepositoryError::ValidationError(err))?;
 
 
-        let expected_price = ((appointment.time.start_time - appointment.time.end_time)
+        let expected_price = price * ((appointment.time.start_time - appointment.time.end_time)
             .num_seconds() as f32
             / duration_in_sec as f32);
 

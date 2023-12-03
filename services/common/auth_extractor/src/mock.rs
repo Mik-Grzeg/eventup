@@ -20,11 +20,13 @@ impl MockClient {
 #[async_trait]
 impl Authorizable for MockClient {
     async fn authorize(&self, _: &str) -> Result<Option<UserIdentifiers>, StatusCode> {
-        self.get_user_identifiers_to_return
+        let authorization_result = self
+            .get_user_identifiers_to_return
             .lock()
             .unwrap()
             .pop()
             .transpose()
-            .map(|option| option.flatten())
+            .map(|option| option.flatten());
+        authorization_result
     }
 }
