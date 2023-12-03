@@ -9,10 +9,12 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [userRole, setUserRole] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const login = async (newToken) => {
     setToken(newToken);
     sessionStorage.setItem('token', newToken);
+    setIsAuthenticated(true);
 
     // Return user role
     return fetchUserRole(newToken);
@@ -21,6 +23,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setToken(null);
     setUserRole(null);
+    setIsAuthenticated(false);
     sessionStorage.removeItem('token');
   };
 
@@ -53,7 +56,7 @@ export const AuthProvider = ({ children }) => {
   const isRegularUser = () => userRole === 'regular';
 
   return (
-    <AuthContext.Provider value={{ token, userRole, login, logout, isAdmin, isRegularUser }}>
+    <AuthContext.Provider value={{ token, userRole, isAuthenticated, login, logout, isAdmin, isRegularUser }}>
       {children}
     </AuthContext.Provider>
   );
