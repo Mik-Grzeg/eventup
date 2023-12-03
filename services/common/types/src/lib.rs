@@ -6,7 +6,14 @@ use uuid::Uuid;
 #[serde(rename_all = "lowercase")]
 pub enum UserRoles {
     Admin,
+    Employee,
     Regular,
+}
+
+impl UserRoles {
+    pub fn regular() -> Self {
+        Self::Regular
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]

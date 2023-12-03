@@ -1,4 +1,4 @@
-mod get_appointments;
+mod appointments;
 mod services;
 
 mod health;

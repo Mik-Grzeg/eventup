@@ -43,6 +43,9 @@ impl From<RepositoryError> for (StatusCode, String) {
                 StatusCode::BAD_REQUEST,
                 "Resource with provided identifiers already exists".into(),
             ),
+            RepositoryError::ValidationError(source) => {
+                (StatusCode::BAD_REQUEST, source.to_string())
+            }
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal Server Error".into(),

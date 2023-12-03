@@ -8,11 +8,13 @@ CREATE TABLE IF NOT EXISTS services (
 
   -- metadata about the edit history
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE NOT NULL
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+
+  active BOOLEAN DEFAULT true
 );
 
 CREATE TABLE IF NOT EXISTS appointments (
-  appointment_id UUID NOT NULL,
+  appointment_id UUID PRIMARY KEY,
   -- company_id UUID NOT NULL,
   service_id UUID REFERENCES services (service_id),
 
@@ -31,13 +33,18 @@ CREATE TABLE IF NOT EXISTS appointments (
 
   -- price related columns
   price_expected FLOAT4 NOT NULL,
-  price_final FLOAT4 NOT NULL,
+  price_final FLOAT4,
   discount FLOAT4,
 
   -- tells whether the service has been canceled/provided
   canceled BOOLEAN NOT NULL DEFAULT false, 
   cancellation_reason TEXT,
-  served BOOLEAN NOT NULL DEFAULT false, 
+  served BOOLEAN NOT NULL DEFAULT false
+);
 
-  PRIMARY KEY(appointment_id) --, company_id)
+CREATE TABLE IF NOT EXISTS employee_schedule (
+  schedule_id UUID PRIMARY KEY,
+  employee_id UUID NOT NULL,
+  start_shift TIMESTAMP WITH TIME ZONE NOT NULL, 
+  end_shift TIMESTAMP WITH TIME ZONE NOT NULL
 );

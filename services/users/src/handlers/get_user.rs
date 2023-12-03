@@ -4,24 +4,24 @@ use axum::extract::{Path, State};
 use axum::response::Json;
 use uuid::Uuid;
 
-use crate::middlewares::auth::RequireAuth;
+use crate::middlewares::auth::Authorization;
 use crate::repository::UserRepository;
 use crate::types::users::UserGet;
 
 use super::errors::PublicError;
 
 pub async fn get_user(
-    RequireAuth(user_identifiers): RequireAuth,
+    Authorization(user_identifiers): Authorization,
     Path(user_id): Path<Uuid>,
     State(user_repository): State<Arc<dyn UserRepository>>,
 ) -> Result<Json<UserGet>, PublicError> {
-    if user_identifiers.id != user_id {
-        return Err(PublicError::Unauthorized);
+    match user_identifiers {
+        Some(identifiers) if identifiers.id == user_id => Ok(Json(
+            user_repository
+                .get_user_by_id(user_id)
+                .await?
+                .ok_or(PublicError::NotFound)?,
+        )),
+        _ => Err(PublicError::Unauthorized),
     }
-    Ok(Json(
-        user_repository
-            .get_user_by_id(user_id)
-            .await?
-            .ok_or(PublicError::NotFound)?,
-    ))
 }

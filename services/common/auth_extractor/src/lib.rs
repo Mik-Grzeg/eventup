@@ -5,79 +5,44 @@ use axum::{
 };
 use common_types::UserIdentifiers;
 
+use std::convert::Infallible;
 use std::sync::Arc;
 
-// Custom extractor for authentication
-pub struct AuthExtractor(pub UserIdentifiers);
+pub mod authorization_client;
 
-#[derive(Clone)]
-pub struct AuthClient {
-    client: reqwest::Client,
-    url: Arc<String>,
-}
-
-impl AuthClient {
-    pub fn new(url: &str) -> Self {
-        let client = reqwest::Client::new();
-        Self {
-            client,
-            url: Arc::new(url.into()),
-        }
-    }
-}
-
-impl std::ops::Deref for AuthClient {
-    type Target = reqwest::Client;
-
-    fn deref(&self) -> &Self::Target {
-        &self.client
-    }
-}
+#[cfg(feature = "test-utils")]
+pub mod mock;
 
 #[async_trait]
-impl<S> FromRequestParts<S> for AuthExtractor
+pub trait Authorizable: std::fmt::Debug + Send + Sync {
+    async fn authorize(&self, auth_header: &str) -> Result<Option<UserIdentifiers>, StatusCode>;
+}
+
+// Custom extractor for authentication
+pub struct AuthorizationControl(pub Option<UserIdentifiers>);
+
+#[async_trait]
+impl<S> FromRequestParts<S> for AuthorizationControl
 where
-    AuthClient: FromRef<S>,
+    Arc<dyn Authorizable>: FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = StatusCode;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let Some(auth_header) = parts
-            .headers
-            .get(header::AUTHORIZATION)
-            .and_then(|value| value.to_str().ok())
-        else {
-            tracing::error!("Authorization header malformed or missing");
-            return Err(StatusCode::FORBIDDEN);
+        let Some(auth_header) = parts.headers.get(header::AUTHORIZATION) else {
+            return Ok(AuthorizationControl(None));
         };
 
-        let auth_client = AuthClient::from_ref(state);
-        let response = auth_client
-            .get(auth_client.url.as_str())
-            .header(reqwest::header::AUTHORIZATION, auth_header)
-            .send()
-            .await
-            .map_err(|err| {
-                tracing::error!("Access control api call failed: {err}");
-                StatusCode::INTERNAL_SERVER_ERROR
-            })?;
-
-        match response.status() {
-            reqwest::StatusCode::FORBIDDEN => return Err(StatusCode::FORBIDDEN),
-            reqwest::StatusCode::UNAUTHORIZED => return Err(StatusCode::UNAUTHORIZED),
-            status_code if !status_code.is_success() => {
-                tracing::error!("No success status code returned from access control api: {status_code:?}");
-                return Err(StatusCode::INTERNAL_SERVER_ERROR)
-            }
-            _ => {}
-        }
-
-        let user_identifiers = response.json::<UserIdentifiers>().await.map_err(|err| {
-            tracing::error!("Unable to deserialize User Identifiers error: {err}");
-            StatusCode::INTERNAL_SERVER_ERROR
+        let auth_header = auth_header.to_str().map_err(|err| {
+            tracing::error!("Authorization header malformed or missing: error = {err}");
+            StatusCode::BAD_REQUEST
         })?;
 
-        Ok(AuthExtractor(user_identifiers))
+        let user_identifiers = Arc::<dyn Authorizable>::from_ref(state)
+            .authorize(auth_header)
+            .await?;
+
+        Ok(AuthorizationControl(user_identifiers))
     }
 }

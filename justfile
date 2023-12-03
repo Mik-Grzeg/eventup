@@ -7,6 +7,8 @@ start-apps:
 # delete all docker compose default services 
 down:
   docker compose down -v
+down-persist-volumes:
+  docker compose down
 # start docker compose environment using log profile which additionally enabled ClickHouse and RedPanda for application logging capabilities
 start-log:
   docker compose --profile log up -d --build

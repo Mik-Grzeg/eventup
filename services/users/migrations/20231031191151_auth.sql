@@ -1,4 +1,4 @@
-CREATE TYPE user_roles AS ENUM ('admin', 'regular');
+CREATE TYPE user_roles AS ENUM ('admin', 'regular', 'employee');
 CREATE TABLE IF NOT EXISTS user_log_infos (
   user_id UUID PRIMARY KEY,
   -- in case we wanted to make it multi tenant sas

@@ -1,16 +1,13 @@
-use crate::{
-    app_state::AppState,
-    middlewares::{auth::RequireAuth},
-};
+use crate::{app_state::AppState, middlewares::auth::Authorization};
 use axum::{
-    middleware::{from_extractor_with_state},
+    middleware::from_extractor_with_state,
     routing::{delete, get, post},
     Router,
 };
 
 use tower_http::trace::TraceLayer;
 
-use super::{delete_user, get_user, login, access_control, post_user, put_user};
+use super::{access_control, delete_user, get_user, login, post_user, put_user};
 
 pub fn router(app_state: AppState) -> Router {
     let health_route = Router::new().route("/health", get(super::health::health));
@@ -22,10 +19,10 @@ pub fn router(app_state: AppState) -> Router {
                 .put(put_user::update_user)
                 .get(get_user::get_user),
         )
-        .route_layer(from_extractor_with_state::<RequireAuth, AppState>(
+        .route("/", post(post_user::create_user))
+        .route_layer(from_extractor_with_state::<Authorization, AppState>(
             app_state.clone(),
         ))
-        .route("/", post(post_user::create_user))
         .with_state(app_state.clone());
 
     let auth_routers = Router::new()

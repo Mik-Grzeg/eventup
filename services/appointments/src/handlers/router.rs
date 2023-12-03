@@ -1,14 +1,15 @@
 use std::sync::Arc;
 
 use crate::app_state::AppState;
+use auth_extractor::AuthorizationControl;
 use axum::{
     routing::{delete, get, post, put},
-    Router,
+    Router, middleware::from_extractor_with_state,
 };
 
 use super::{
-    get_appointments,
-    services::{delete_service, get_services, post_service, put_service},
+    appointments::{delete_appointment, get_appointments, post_appointment},
+    services::{get_services, post_service, put_service},
 };
 use tower_http::trace::TraceLayer;
 
@@ -19,11 +20,18 @@ pub fn router(app_state: AppState) -> Router {
         .route("/", post(post_service::post_service))
         .route("/", get(get_services::get_services))
         .route("/:id", put(put_service::put_service))
-        .route("/:id", delete(delete_service::delete_service))
+        .route_layer(from_extractor_with_state::<AuthorizationControl, AppState>(
+            app_state.clone(),
+        ))
         .with_state(app_state.clone());
 
     let appointments_router = Router::new()
         .route("/", get(get_appointments::get_appointments_for_user))
+        .route("/", post(post_appointment::create_appointment))
+        .route("/:id", delete(delete_appointment::delete_appointment))
+        .route_layer(from_extractor_with_state::<AuthorizationControl, AppState>(
+            app_state.clone(),
+        ))
         .with_state(app_state.clone());
 
     let api_routers = Router::new()

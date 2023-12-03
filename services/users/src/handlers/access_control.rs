@@ -1,8 +1,16 @@
 use axum::Json;
 
-use crate::middlewares::auth::RequireAuth;
+use crate::middlewares::auth::Authorization;
 use common_types::UserIdentifiers;
 
-pub async fn access_control(RequireAuth(user_identifiers): RequireAuth) -> Json<UserIdentifiers> {
-    Json(user_identifiers)
+use super::errors::PublicError;
+
+pub async fn access_control(
+    Authorization(user_identifiers): Authorization,
+) -> Result<Json<UserIdentifiers>, PublicError> {
+    if let Some(identifiers) = user_identifiers {
+        Ok(Json(identifiers))
+    } else {
+        Err(PublicError::Unauthorized)
+    }
 }

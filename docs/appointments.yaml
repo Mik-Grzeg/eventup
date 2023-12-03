@@ -74,22 +74,6 @@ paths:
         '404':
           description: service not found
 
-    delete:
-      summary: delete service by service id
-      parameters:
-        - name: service_id
-          in: path
-          required: true
-          description: id of the service to delete
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '204':
-          description: service deleted successfully
-        '404':
-          description: service not found
-
   /appointments:
     post:
       summary: create a new appointment
@@ -192,6 +176,9 @@ components:
         price:
           type: number
           description: the price of the service
+        active:
+          type: boolean
+          description: tells if the service is active
 
     appointment:
       type: object

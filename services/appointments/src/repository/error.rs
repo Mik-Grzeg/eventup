@@ -1,9 +1,13 @@
 use std::error::Error;
 
+use validator::ValidationErrors;
+
 #[derive(Debug)]
 pub enum RepositoryError {
     SQLXDatabase(sqlx::error::ErrorKind),
     SQLXOther,
+    ValidationError(ValidationErrors),
+    Unauthorized,
 }
 
 impl Error for RepositoryError {}

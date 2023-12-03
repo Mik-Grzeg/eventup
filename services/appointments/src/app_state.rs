@@ -1,21 +1,23 @@
 use std::sync::Arc;
 
-use auth_extractor::AuthClient;
+use auth_extractor::{authorization_client::AuthorizationClient};
 use axum::extract::FromRef;
+use sqlx::PgPool;
 
 use crate::{
     config::AppConfig,
     repository::{postgres::PostgresRepo, AppointmentRepository, ServiceRepository},
 };
+use auth_extractor::Authorizable;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub access_control_client: AuthClient,
+    pub access_control_client: Arc<dyn Authorizable>,
     pub service_repository: Arc<dyn ServiceRepository>,
     pub appointment_repository: Arc<dyn AppointmentRepository>,
 }
 
-impl FromRef<AppState> for AuthClient {
+impl FromRef<AppState> for Arc<dyn Authorizable> {
     fn from_ref(app_state: &AppState) -> Self {
         app_state.access_control_client.clone()
     }
@@ -38,11 +40,31 @@ impl AppState {
         let postgres_repo = Arc::new(PostgresRepo::from_config(config).await);
         let appointment_repository = postgres_repo.clone();
         let service_repository = postgres_repo;
-        let access_control_client = AuthClient::new(&config.access_control_url);
+        let access_control_client = Arc::new(AuthorizationClient::new(&config.access_control_url));
         Self {
             access_control_client,
             appointment_repository,
             service_repository,
         }
+    }
+
+    pub async fn new(pool: PgPool) -> Self {
+        let repo = Arc::new(PostgresRepo::new(pool).await);
+        let appointment_repository = repo.clone();
+        let service_repository = repo;
+        let default_config = AppConfig::default();
+        let access_control_client =
+            Arc::new(AuthorizationClient::new(&default_config.access_control_url));
+
+        Self {
+            appointment_repository,
+            service_repository,
+            access_control_client,
+        }
+    }
+
+    pub fn with_access_control(mut self, access_control: Arc<dyn Authorizable>) -> Self {
+        self.access_control_client = access_control;
+        self
     }
 }

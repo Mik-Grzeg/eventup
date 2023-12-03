@@ -1,4 +1,4 @@
-use lib::{app_state::AppState, config::AppConfig, handlers, init_tracing};
+use users_lib::{app_state::AppState, config::AppConfig, handlers, init_tracing};
 
 #[tokio::main]
 async fn main() {

@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use common_types::UserRoles;
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -23,6 +24,8 @@ pub struct UserPost {
     #[serde(flatten)]
     #[validate]
     pub account: UserAccountPut,
+    #[serde(skip_serializing)]
+    pub role: Option<UserRoles>
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
