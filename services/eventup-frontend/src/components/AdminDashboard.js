@@ -1,141 +1,198 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../hooks/AuthContext';
 import Logout from './Logout';
 
+const ServiceTable = ({ services, toggleServiceVisibility, handleEditService }) => {
+  const { isAdmin } = useAuth();
+
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Duration</th>
+          <th>Price</th>
+          <th>Active</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {services.map((service) => (
+          <tr key={service.service_id}>
+            <td>{service.name}</td>
+            <td>{service.description}</td>
+            <td>{service.duration_in_sec}</td>
+            <td>{service.price}</td>
+            <td>
+              <input
+                type="checkbox"
+                checked={service.active}
+                onChange={() => toggleServiceVisibility(service)}
+                disabled={!isAdmin()}
+              />
+            </td>
+            <td>
+              <button onClick={() => handleEditService(service)}>Edit</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};
+
 const AdminDashboard = () => {
+  const { token } = useAuth();
   const [services, setServices] = useState([]);
-  const [serviceModalVisible, setServiceModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState({
-    company_id: '',
     name: '',
     description: '',
     duration_in_sec: 0,
     price: 0,
+    active: true,
   });
+  const [isEditing, setIsEditing] = useState(false);
+  const [serviceModalVisible, setServiceModalVisible] = useState(false);
 
   useEffect(() => {
-    // Fetch services when the component mounts
-    axios.get('http://localhost:8080/api/v1/services')
-      .then(response => {
-        setServices(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching services:', error);
-      });
+    fetchServices();
   }, []);
 
-  const handleCreateService = () => {
-    axios.post('http://localhost:8080/api/v1/services', selectedService)
-      .then(response => {
-        setServices([...services, response.data]);
-        setServiceModalVisible(false);
-        clearSelectedService();
-      })
-      .catch(error => {
-        console.error('Error creating service:', error);
+  const fetchServices = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/api/v1/services', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      setServices(response.data);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
   };
 
-  const handleUpdateService = () => {
-    axios.put(`http://localhost:8080/api/v1/services/${selectedService.service_id}`, selectedService)
-      .then(response => {
-        const updatedServices = services.map(service =>
-          service.service_id === selectedService.service_id ? response.data : service
-        );
-        setServices(updatedServices);
-        setServiceModalVisible(false);
-        clearSelectedService();
-      })
-      .catch(error => {
-        console.error('Error updating service:', error);
+  const handleCreateService = async () => {
+    try {
+      const numericService = {
+        ...selectedService,
+        duration_in_sec: Number(selectedService.duration_in_sec),
+        price: Number(selectedService.price),
+      };
+      await axios.post('http://localhost:8080/api/v1/services', numericService, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      setServiceModalVisible(false);
+      fetchServices();
+    } catch (error) {
+      console.error('Error creating service:', error);
+    }
   };
 
-  const handleRemoveService = (serviceId) => {
-    axios.delete(`http://localhost:8080/api/v1/services/${serviceId}`)
-      .then(() => {
-        const updatedServices = services.filter(service => service.service_id !== serviceId);
-        setServices(updatedServices);
-      })
-      .catch(error => {
-        console.error('Error removing service:', error);
+  const handleUpdateService = async () => {
+    try {
+      const numericService = {
+        ...selectedService,
+        duration_in_sec: Number(selectedService.duration_in_sec),
+        price: Number(selectedService.price),
+      };
+      await axios.put(`http://localhost:8080/api/v1/services/${selectedService.service_id}`, numericService, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      setServiceModalVisible(false);
+      setIsEditing(false);
+      fetchServices();
+    } catch (error) {
+      console.error('Error updating service:', error);
+    }
   };
 
-  const openServiceModal = (service) => {
-    setSelectedService(service || {
-      company_id: '',
-      name: '',
-      description: '',
-      duration_in_sec: 0,
-      price: 0,
+  const toggleServiceVisibility = async (service) => {
+    try {
+      const updatedService = { ...service, active: !service.active };
+      setSelectedService(updatedService);
+      await axios.put(`http://localhost:8080/api/v1/services/${service.service_id}`, updatedService, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      fetchServices();
+    } catch (error) {
+      console.error('Error toggling service visibility:', error);
+    }
+  };
+
+  const handleEditService = (service) => {
+    const { duration_in_sec, price, ...rest } = service;
+    setSelectedService({
+      ...rest,
+      duration_in_sec: duration_in_sec.toString(),
+      price: price.toString(),
     });
     setServiceModalVisible(true);
-  };
-
-  const closeServiceModal = () => {
-    setServiceModalVisible(false);
-    clearSelectedService();
-  };
-
-  const clearSelectedService = () => {
-    setSelectedService({
-      company_id: '',
-      name: '',
-      description: '',
-      duration_in_sec: 0,
-      price: 0,
-    });
+    setIsEditing(true);
   };
 
   return (
     <div>
       <h1>Admin Dashboard</h1>
-      <Logout />      
-      <button onClick={() => openServiceModal(null)}>Add Service</button>
+      <Logout />
+      <button onClick={() => { setSelectedService({ name: '', description: '', duration_in_sec: 0, price: 0, active: true }); setIsEditing(false); setServiceModalVisible(true); }}>Add Service</button>
 
       {/* Display a list of services */}
-      <h2>Services</h2>
-      <ul>
-        {services.map(service => (
-          <li key={service.service_id}>
-            {service.name} - Duration: {service.duration_in_sec}s, Price: {service.price}
-            <button onClick={() => openServiceModal(service)}>Edit</button>
-            <button onClick={() => handleRemoveService(service.service_id)}>Remove</button>
-          </li>
-        ))}
-      </ul>
+      <ServiceTable
+        services={services}
+        toggleServiceVisibility={toggleServiceVisibility}
+        handleEditService={handleEditService}
+      />
 
       {/* Service Modal */}
       {serviceModalVisible && (
         <div>
-          <h3>{selectedService.service_id ? 'Edit Service' : 'Add Service'}</h3>
-          <label>Name:</label>
-          <input
-            type="text"
-            value={selectedService.name}
-            onChange={(e) => setSelectedService({ ...selectedService, name: e.target.value })}
-          />
-          <label>Description:</label>
-          <input
-            type="text"
-            value={selectedService.description}
-            onChange={(e) => setSelectedService({ ...selectedService, description: e.target.value })}
-          />
-          <label>Duration (seconds):</label>
-          <input
-            type="number"
-            value={selectedService.duration_in_sec}
-            onChange={(e) => setSelectedService({ ...selectedService, duration_in_sec: +e.target.value })}
-          />
-          <label>Price:</label>
-          <input
-            type="number"
-            value={selectedService.price}
-            onChange={(e) => setSelectedService({ ...selectedService, price: +e.target.value })}
-          />
-          <button onClick={() => selectedService.service_id ? handleUpdateService() : handleCreateService()}>Save</button>
-          <button onClick={closeServiceModal}>Cancel</button>
+          <h3>{isEditing ? 'Edit Service' : 'Add Service'}</h3>
+          {/* Input fields for creating/editing service */}
+          <label>
+            Name:
+            <input
+              type="text"
+              value={selectedService.name}
+              onChange={(e) => setSelectedService({ ...selectedService, name: e.target.value })}
+            />
+          </label>
+          <label>
+            Description:
+            <input
+              type="text"
+              value={selectedService.description}
+              onChange={(e) => setSelectedService({ ...selectedService, description: e.target.value })}
+            />
+          </label>
+          <label>
+            Duration (in seconds):
+            <input
+              type="number"
+              value={selectedService.duration_in_sec}
+              onChange={(e) => setSelectedService({ ...selectedService, duration_in_sec: e.target.value })}
+            />
+          </label>
+          <label>
+            Price:
+            <input
+              type="number"
+              value={selectedService.price}
+              onChange={(e) => setSelectedService({ ...selectedService, price: e.target.value })}
+            />
+          </label>
+
+          <button onClick={isEditing ? handleUpdateService : handleCreateService}>
+            Save
+          </button>
+          <button onClick={() => setServiceModalVisible(false)}>Cancel</button>
         </div>
       )}
     </div>
