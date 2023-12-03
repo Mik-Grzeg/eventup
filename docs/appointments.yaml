@@ -4,6 +4,18 @@ info:
   version: 1.0.0
 paths:
   /services:
+    get:
+      summary: Get services detail
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Service"
+        '404':
+          description: Service not found
+
     post:
       summary: Create a new service
       requestBody:
@@ -36,26 +48,6 @@ paths:
           description: Bad request
 
   /services/{service_id}:
-    get:
-      summary: Get service details by service ID
-      parameters:
-        - name: service_id
-          in: path
-          required: true
-          description: ID of the service to retrieve
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Service"
-        '404':
-          description: Service not found
-
     put:
       summary: Update service details by service ID
       parameters:
