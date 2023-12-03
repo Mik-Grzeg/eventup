@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const RegistrationPage = () => {
@@ -9,6 +9,7 @@ const RegistrationPage = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [registrationError, setRegistrationError] = useState(null);
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     try {
@@ -24,11 +25,12 @@ const RegistrationPage = () => {
       setRegistrationError('Registration successful!');
 
       // Optionally, you can redirect to the login page or handle it based on your application flow
-
+      navigate('/login'); 
       // Clear any previous registration error after a short delay
       setTimeout(() => {
         setRegistrationError(null);
-      }, 5000);
+      }, 10000);
+
     } catch (error) {
       // Handle registration error
       if (error.response) {

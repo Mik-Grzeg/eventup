@@ -1,12 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
-    // Initialize token from sessionStorage or other secure storage
     return sessionStorage.getItem('token') || null;
   });
 
@@ -14,39 +12,41 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (newToken) => {
     setToken(newToken);
-    // Save the token to sessionStorage or other secure storage
     sessionStorage.setItem('token', newToken);
 
-    // Fetch user role after login
-    await fetchUserRole();
-
+    // Return user role
+    return fetchUserRole(newToken);
   };
 
   const logout = () => {
     setToken(null);
     setUserRole(null);
-    // Remove the token from sessionStorage or other secure storage
     sessionStorage.removeItem('token');
   };
 
-  const fetchUserRole = async () => {
+  const fetchUserRole = async (currentToken) => {
     try {
       const response = await axios.get('http://localhost:8080/api/v1/auth/access', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${currentToken}`,
         },
       });
-
       setUserRole(response.data.role);
+      return response.data.role;
     } catch (error) {
       console.error('Error fetching user role:', error);
+      return null;
     }
   };
 
   useEffect(() => {
-    if (token) {
-      fetchUserRole();
-    }
+    const fetchData = async () => {
+      if (token) {
+        await fetchUserRole(token);
+      }
+    };
+
+    fetchData();
   }, [token]);
 
   const isAdmin = () => userRole === 'admin';

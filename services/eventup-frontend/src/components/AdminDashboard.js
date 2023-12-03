@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Logout from './Logout';
 
 const AdminDashboard = () => {
   const [services, setServices] = useState([]);
@@ -90,7 +91,7 @@ const AdminDashboard = () => {
   return (
     <div>
       <h1>Admin Dashboard</h1>
-
+      <Logout />      
       <button onClick={() => openServiceModal(null)}>Add Service</button>
 
       {/* Display a list of services */}

@@ -1,5 +1,7 @@
+// LandingPage.js
 import React from 'react';
 import ServiceList from './ServiceList';
+import NavigationMenu from './NavigationMenu';
 
 const LandingPage = () => {
   const handleMakeAppointment = (serviceId) => {
@@ -9,7 +11,10 @@ const LandingPage = () => {
 
   return (
     <div>
-      <h1>Event Reservation App</h1>
+      <header>
+        <h1>Event Reservation App</h1>
+        <NavigationMenu />
+      </header>
       <ServiceList onMakeAppointment={handleMakeAppointment} />
     </div>
   );

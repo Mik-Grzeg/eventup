@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Remove Routes
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
 import axios from 'axios';
 
@@ -13,15 +13,23 @@ const LoginPage = () => {
   const handleLogin = async () => {
     try {
       const response = await axios.post('http://localhost:8080/api/v1/auth/login', { email, password });
-      login(response.data.token);
-      console.log('Login successful. Token:', response.data.token);
 
-      if (isAdmin()) {
+      // Wait for the login function to complete before continuing
+      const userRole = await login(response.data.token);
+
+      console.log('Authentication successful. Token:', response.data.token);
+      console.log('Authorization successful. Role:', userRole);
+
+      // Navigate based on user role
+      if (userRole === 'admin') {
         navigate('/admin');
-      } else if (isRegularUser()) {
+        console.log('Navigating to /admin');
+      } else if (userRole === 'regular') {
         navigate('/dashboard');
+        console.log('Navigating to /dashboard');
       } else {
         navigate('/');
+        console.log('Navigating to /');
       }
     } catch (error) {
       console.error('Login failed:', error);
