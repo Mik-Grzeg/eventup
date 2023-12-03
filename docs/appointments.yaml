@@ -82,7 +82,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/appointment"
+              $ref: "#/components/schemas/AppointmentPost"
       responses:
         '201':
           description: appointment created successfully
@@ -106,7 +106,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/appointment"
+                $ref: "#/components/schemas/AppointmentGet"
         '404':
           description: appointment not found
 
@@ -125,7 +125,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/appointment"
+              $ref: "#/components/schemas/AppointmentPut"
       responses:
         '200':
           description: successful operation
@@ -180,18 +180,74 @@ components:
           type: boolean
           description: tells if the service is active
 
-    appointment:
+    AppointmentPost:
       type: object
+      required:
+        - service_id
+        - client_id
+        - client_name
+        - employee_id
+        - start_time
+        - end_time
       properties:
-        appointment_id:
+        service_id:
           type: string
           format: uuid
-          readonly: true
-          description: the unique identifier for an appointment
-        company_id:
+          description: the id of the service associated with the appointment
+        client_id:
           type: string
           format: uuid
-          description: the id of the company where the appointment is scheduled
+          description: the id of the client for the appointment
+        employee_id:
+          type: string
+          format: uuid
+          description: the id of the employee handling the appointment
+        client_name:
+          type: string
+          description: the name of the client
+        start_time:
+          type: string
+          format: date-time
+          description: the start time of the appointment
+        end_time:
+          type: string
+          format: date-time
+          description: the end time of the appointment
+
+    AppointmentPut:
+      type: object
+      required:
+      properties:
+        start_time:
+          type: string
+          format: date-time
+          description: the start time of the appointment
+        end_time:
+          type: string
+          format: date-time
+          description: the end time of the appointment
+        client_name:
+          type: string
+          description: the name of the client
+        employee_id:
+          type: string
+          format: uuid
+          description: the id of the employee handling the appointment
+
+    AppointmentGet:
+      type: object
+
+      required:
+        - service_id
+        - client_id
+        - client_name
+        - employee_id
+        - start_time
+        - end_time
+        - price_expected
+        - canceled
+        - served
+      properties:
         service_id:
           type: string
           format: uuid
@@ -226,16 +282,15 @@ components:
           format: date-time
           description: the end time of the appointment
         price_expected:
-          type: string
-          format: money
+          type: number
+          format: decimal
           description: the expected price for the service
         price_final:
-          type: string
-          format: money
+          type: number
+          format: decimal
           description: the final price for the service
         discount:
           type: number
-          format: decimal
           description: the discount applied to the service price
         canceled:
           type: boolean
