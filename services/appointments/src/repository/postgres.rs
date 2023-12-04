@@ -299,7 +299,7 @@ impl ServiceRepository for PostgresRepo {
     // schedules
     async fn get_schedules(&self) -> Result<Vec<ScheduleGet>, RepositoryError> {
         Ok(
-            sqlx::query_as::<_, ScheduleGet>("SELECT * FROM employee_schedule")
+            sqlx::query_as::<_, ScheduleGet>("SELECT * FROM employee_schedules")
                 .fetch_all(&self.pool)
                 .await?,
         )
@@ -312,7 +312,7 @@ impl ServiceRepository for PostgresRepo {
     ) -> Result<ScheduleGet, RepositoryError> {
         let schedule_id = Uuid::new_v4();
 
-        sqlx::query("INSERT INTO employee_schedule (schedule_id, employee_id, service_id, start_shift, end_shift) VALUES ($1, $2, $3, $4, $5)")
+        sqlx::query("INSERT INTO employee_schedules (schedule_id, employee_id, service_id, start_shift, end_shift) VALUES ($1, $2, $3, $4, $5)")
         .bind(schedule_id)
         .bind(schedule.employee_id)
         .bind(schedule.service_id)

@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS appointments (
   UNIQUE(start_time, end_time, employee_id)
 );
 
-CREATE TABLE IF NOT EXISTS employee_schedule (
+CREATE TABLE IF NOT EXISTS employee_schedules (
   schedule_id UUID PRIMARY KEY,
   employee_id UUID NOT NULL,
   service_id UUID NOT NULL,
