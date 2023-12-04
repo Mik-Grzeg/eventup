@@ -1,5 +1,3 @@
-
-
 use crate::app_state::AppState;
 use auth_extractor::AuthorizationControl;
 use axum::{
@@ -10,7 +8,8 @@ use axum::{
 
 use super::{
     appointments::{delete_appointment, get_appointments, post_appointment},
-    services::{get_services, post_service, put_service},
+    schedules::{get_schedules, post_schedule},
+    services::{get_service, get_services, post_service, put_service},
 };
 use tower_http::trace::TraceLayer;
 
@@ -22,7 +21,10 @@ pub fn router(app_state: AppState) -> Router {
             "/",
             post(post_service::post_service).get(get_services::get_services),
         )
-        .route("/:id", put(put_service::put_service));
+        .route(
+            "/:id",
+            put(put_service::put_service).get(get_service::get_service),
+        );
 
     let appointments_router = Router::new()
         .route("/", post(post_appointment::create_appointment))
@@ -32,9 +34,15 @@ pub fn router(app_state: AppState) -> Router {
                 .delete(delete_appointment::delete_appointment),
         );
 
+    let schedules_router = Router::new().route(
+        "/",
+        post(post_schedule::post_schedule).get(get_schedules::get_schedules),
+    );
+
     let api_routers = Router::new()
         .nest("/appointments", appointments_router)
         .nest("/services", services_router)
+        .nest("/employee_schedules", schedules_router)
         .route_layer(from_extractor_with_state::<AuthorizationControl, AppState>(
             app_state.clone(),
         ))

@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::config::AppConfig;
 use crate::types::appointments::AppointmentGet;
+use crate::types::schedules::{ScheduleGet, SchedulePost, ScheduleRange};
 use crate::types::services::{update_service, ServiceGet, ServicePost};
 
 use super::error::RepositoryError;
@@ -200,6 +201,18 @@ impl ServiceRepository for PostgresRepo {
         )
     }
 
+    async fn get_service_by_id(
+        &self,
+        service_id: Uuid,
+    ) -> Result<Option<ServiceGet>, RepositoryError> {
+        Ok(
+            sqlx::query_as::<_, ServiceGet>("SELECT * FROM services WHERE service_id = $1")
+                .bind(service_id)
+                .fetch_optional(&self.pool)
+                .await?,
+        )
+    }
+
     async fn get_service_metadata(
         &self,
         service_id: Uuid,
@@ -268,17 +281,56 @@ impl ServiceRepository for PostgresRepo {
         update_service(&mut old_service, service);
         old_service.updated_at = now;
 
-        sqlx::query("UPDATE services SET name = $1, description = $2, duration_in_sec = $3, price = $4, active = $5 WHERE service_id = $6")
+        sqlx::query("UPDATE services SET name = $1, description = $2, duration_in_sec = $3, price = $4, active = $5, updated_at = $6 WHERE service_id = $7")
             .bind(old_service.name.clone())
             .bind(old_service.description.clone())
             .bind(old_service.duration_in_sec)
             .bind(old_service.price)
             .bind(old_service.active)
+            .bind(now)
             .bind(service_id)
             .execute(&mut *tx)
             .await?;
         tx.commit().await?;
 
         Ok(Some(old_service))
+    }
+
+    // schedules
+    async fn get_schedules(&self) -> Result<Vec<ScheduleGet>, RepositoryError> {
+        Ok(
+            sqlx::query_as::<_, ScheduleGet>("SELECT * FROM employee_schedule")
+                .fetch_all(&self.pool)
+                .await?,
+        )
+    }
+
+    // schedules
+    async fn create_schedule(
+        &self,
+        schedule: SchedulePost,
+    ) -> Result<ScheduleGet, RepositoryError> {
+        let schedule_id = Uuid::new_v4();
+
+        sqlx::query("INSERT INTO employee_schedule (schedule_id, employee_id, service_id, start_shift, end_shift) VALUES ($1, $2, $3, $4, $5)")
+        .bind(schedule_id)
+        .bind(schedule.employee_id)
+        .bind(schedule.service_id)
+        .bind(schedule.time.start_shift)
+        .bind(schedule.time.end_shift)
+            .execute(&self.pool)
+            .await?;
+
+        let schedule_get = ScheduleGet {
+            schedule_id,
+            employee_id: schedule.employee_id,
+            service_id: schedule.service_id,
+            time: ScheduleRange {
+                start_shift: schedule.time.start_shift,
+                end_shift: schedule.time.end_shift,
+            },
+        };
+
+        Ok(schedule_get)
     }
 }

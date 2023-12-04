@@ -19,7 +19,6 @@ use serde_json::json;
 use sqlx::PgPool;
 use tower::ServiceExt;
 
-
 use utils::{admin_user_identifiers, init_tracing, regular_user_identifiers};
 
 use auth_extractor::mock::MockClient;
@@ -108,23 +107,22 @@ async fn test_creating_service_by_admin(pool: PgPool) {
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let services: Vec<ServiceGet> = serde_json::from_slice(&body).unwrap();
 
-    // One appointement is already in database as demo data
-    assert_eq!(services.len(), 3);
+    assert_eq!(services.len(), 2);
     // Check prices of both services
-    assert_eq!(services[1].duration_in_sec, 60 * 30);
-    assert_eq!(services[2].duration_in_sec, 60 * 60);
+    assert_eq!(services[0].duration_in_sec, 60 * 30);
+    assert_eq!(services[1].duration_in_sec, 60 * 60);
 
     // Check names of both services
-    assert_eq!(services[1].name, "Test active service");
-    assert_eq!(services[2].name, "Test inactive service");
+    assert_eq!(services[0].name, "Test active service");
+    assert_eq!(services[1].name, "Test inactive service");
 
     // Check prices of both services
-    assert_eq!(services[1].price, 10.0);
-    assert_eq!(services[2].price, 100.0);
+    assert_eq!(services[0].price, 10.0);
+    assert_eq!(services[1].price, 100.0);
 
     // Check activity of both services
-    assert!(services[1].active);
-    assert!(!services[2].active);
+    assert!(services[0].active);
+    assert!(!services[1].active);
 
     // View as regular user
     access.set_get_identifiers_return(Ok(Some(regular_user_identifiers())));
@@ -147,18 +145,12 @@ async fn test_creating_service_by_admin(pool: PgPool) {
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let services: Vec<ServiceGet> = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(services.len(), 2);
-    // Check price of active service
-    assert_eq!(services[1].duration_in_sec, 60 * 30);
-
-    // Check name of active services
-    assert_eq!(services[1].name, "Test active service");
-
-    // Check price of ative services
-    assert_eq!(services[1].price, 10.0);
-
-    // Check activity of active services
-    assert!(services[1].active);
+    assert_eq!(services.len(), 1);
+    assert_eq!(services[0].duration_in_sec, 60 * 30);
+    assert_eq!(services[0].name, "Test active service");
+    assert_eq!(services[0].price, 10.0);
+    assert_eq!(services[0].updated_at, services[0].created_at);
+    assert!(services[0].active);
 }
 
 #[sqlx::test]
@@ -197,7 +189,7 @@ async fn test_creating_service_by_regular_user(pool: PgPool) {
     assert_eq!(StatusCode::UNAUTHORIZED, response.status());
 }
 
-#[sqlx::test]
+#[sqlx::test(fixtures("services.sql"))]
 async fn test_updating_service_by_regular_user(pool: PgPool) {
     let access = Arc::new(MockClient::default());
     let app_state = AppState::new(pool)
@@ -207,40 +199,13 @@ async fn test_updating_service_by_regular_user(pool: PgPool) {
 
     init_tracing();
 
-    access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
-    // POST a new active service
-    let response = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .uri("/api/v1/services")
-                .method(Method::POST)
-                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
-                .header(http::header::AUTHORIZATION, "")
-                .body(Body::from(
-                    json!({
-                        "name": "Test active service",
-                        "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
-                        "duration_in_sec": 60 * 30,
-                        "price": 10.0,
-                    })
-                    .to_string(),
-                ))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    assert_eq!(StatusCode::CREATED, response.status());
-    let body = response.into_body().collect().await.unwrap().to_bytes();
-    let body: ServiceGet = serde_json::from_slice(&body).unwrap();
-
     access.set_get_identifiers_return(Ok(Some(regular_user_identifiers())));
     // PUT update service
     let response = app
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/services/{}", body.service_id))
+                .uri("/api/v1/services/00000000-0000-0000-0000-000000000001")
                 .method(Method::PUT)
                 .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .header(http::header::AUTHORIZATION, "")
@@ -257,7 +222,7 @@ async fn test_updating_service_by_regular_user(pool: PgPool) {
     assert_eq!(StatusCode::UNAUTHORIZED, response.status());
 }
 
-#[sqlx::test]
+#[sqlx::test(fixtures("services.sql"))]
 async fn test_updating_service_by_admin_user(pool: PgPool) {
     let access = Arc::new(MockClient::default());
     let app_state = AppState::new(pool)
@@ -268,39 +233,12 @@ async fn test_updating_service_by_admin_user(pool: PgPool) {
     init_tracing();
 
     access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
-    // POST a new active service
-    let response = app
-        .clone()
-        .oneshot(
-            Request::builder()
-                .uri("/api/v1/services")
-                .method(Method::POST)
-                .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
-                .header(http::header::AUTHORIZATION, "")
-                .body(Body::from(
-                    json!({
-                        "name": "Test active service",
-                        "description": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
-                        "duration_in_sec": 60 * 30,
-                        "price": 10.0,
-                    })
-                    .to_string(),
-                ))
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-    assert_eq!(StatusCode::CREATED, response.status());
-    let body = response.into_body().collect().await.unwrap().to_bytes();
-    let body: ServiceGet = serde_json::from_slice(&body).unwrap();
-
-    access.set_get_identifiers_return(Ok(Some(admin_user_identifiers())));
     // PUT update service
     let response = app
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/services/{}", body.service_id))
+                .uri("/api/v1/services/00000000-0000-0000-0000-000000000001")
                 .method(Method::PUT)
                 .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .header(http::header::AUTHORIZATION, "")
@@ -317,18 +255,27 @@ async fn test_updating_service_by_admin_user(pool: PgPool) {
         .unwrap();
     assert_eq!(StatusCode::OK, response.status());
 
+    // GET updated service
+    let response = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .uri("/api/v1/services/00000000-0000-0000-0000-000000000001")
+                .method(Method::GET)
+                .header(http::header::AUTHORIZATION, "")
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(StatusCode::OK, response.status());
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let service: ServiceGet = serde_json::from_slice(&body).unwrap();
 
-    // Check price of the service
-    assert_eq!(service.duration_in_sec, 60 * 30);
-
-    // Check updated name of the service
-    assert_eq!(service.name, "New Test active service");
-
-    // Check prices of the services
-    assert_eq!(service.price, 37.0);
-
-    // Check activity of the services
+    assert_eq!(service.duration_in_sec, 60 * 60);
+    assert_eq!(service.name, "New Test active service"); // updated service name
+    assert_eq!(service.price, 37.0); // updated price
+    assert_ne!(service.created_at, service.updated_at); // updated updated_at
     assert!(service.active);
 }

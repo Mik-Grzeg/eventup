@@ -5,7 +5,7 @@ use crate::types::users::{
 };
 use crate::types::users::{UserAccountPut, UserGet, UserPost};
 use chrono::Utc;
-use common_types::UserIdentifiers;
+use common_types::{UserIdentifiers, UserRoles};
 
 use async_trait::async_trait;
 use bcrypt::{hash_with_salt, verify, DEFAULT_COST};
@@ -127,18 +127,41 @@ impl UserRepository for PgUserRepository {
             .await?)
     }
 
+    async fn get_employees(&self) -> Result<Vec<UserGet>, RepositoryError> {
+        Ok(sqlx::query_as::<_, UserGet>(
+            r#"
+            SELECT 
+                ul.user_id user_id,
+                ul.email email,
+                ul.role role,
+                ua.phone_number phone_number,
+                ua.first_name first_name,
+                ua.last_name last_name, 
+                ua.created_at created_at,
+                ua.updated_at updated_at
+            FROM user_log_infos ul
+            INNER JOIN user_accounts ua ON ul.user_id = ua.user_id
+            WHERE ul.role = 'employee' 
+        "#,
+        )
+        .fetch_all(&self.pool)
+        .await?)
+    }
+
     async fn create_user(&self, user_post: UserPost) -> Result<UserGet, RepositoryError> {
         let uuid = Uuid::new_v4();
         let salt = generate_random_salt();
         let password_hashed = hash_with_salt(user_post.credentials.password, DEFAULT_COST, salt)?;
         let now = Utc::now();
+        let role = user_post.role.unwrap_or(UserRoles::Regular);
 
         let mut tx = self.pool.begin().await?;
-        sqlx::query("INSERT INTO user_log_infos (user_id, email, password_hashed, password_salt) VALUES ($1, $2, $3, $4)")
+        sqlx::query("INSERT INTO user_log_infos (user_id, email, password_hashed, password_salt, role) VALUES ($1, $2, $3, $4, $5)")
             .bind(uuid)
             .bind(user_post.credentials.email.clone())
             .bind(password_hashed.to_string())
             .bind(salt)
+            .bind(role)
             .execute(&mut *tx)
             .await?;
 
@@ -160,6 +183,7 @@ impl UserRepository for PgUserRepository {
             last_name: user_post.account.last_name,
             created_at: now,
             updated_at: now,
+            role,
         };
 
         tx.commit().await?;

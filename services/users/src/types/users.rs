@@ -24,7 +24,6 @@ pub struct UserPost {
     #[serde(flatten)]
     #[validate]
     pub account: UserAccountPut,
-    #[serde(skip_serializing)]
     pub role: Option<UserRoles>,
 }
 
@@ -37,6 +36,7 @@ pub struct UserGet {
     pub last_name: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub role: UserRoles,
 }
 
 #[derive(Debug, Deserialize, Serialize, Validate)]

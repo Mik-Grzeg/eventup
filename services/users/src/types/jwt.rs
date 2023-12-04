@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use anyhow::anyhow;
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, TokenData, Validation};
@@ -7,10 +7,16 @@ use uuid::Uuid;
 
 use common_types::{UserIdentifiers, UserRoles};
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct LoginTokenRespone {
     pub token: String,
     pub r#type: TokenType,
+}
+
+impl LoginTokenRespone {
+    pub fn to_auth_header(&self) -> String {
+        format!("{} {}", self.r#type, self.token)
+    }
 }
 
 impl TryFrom<&str> for LoginTokenRespone {
@@ -32,10 +38,16 @@ impl TryFrom<&str> for LoginTokenRespone {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub enum TokenType {
     Bearer,
+}
+
+impl Display for TokenType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Bearer")
+    }
 }
 
 impl FromStr for TokenType {

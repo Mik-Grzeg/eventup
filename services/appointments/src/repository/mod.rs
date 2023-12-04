@@ -8,6 +8,7 @@ use error::RepositoryError;
 
 use crate::types::{
     appointments::{AppointmentGet, AppointmentPost, AppointmentPut},
+    schedules::{ScheduleGet, SchedulePost},
     services::{ServiceGet, ServicePost, ServicePut},
 };
 
@@ -96,8 +97,13 @@ impl<AR: AppointmentRepository + ?Sized + 'static> AppointmentRepository for Arc
 
 #[async_trait]
 pub trait ServiceRepository: Send + Sync {
+    // services
     async fn get_all_services(&self) -> Result<Vec<ServiceGet>, RepositoryError>;
     async fn get_active_services(&self) -> Result<Vec<ServiceGet>, RepositoryError>;
+    async fn get_service_by_id(
+        &self,
+        service_id: Uuid,
+    ) -> Result<Option<ServiceGet>, RepositoryError>;
     async fn get_service_metadata(
         &self,
         service_id: Uuid,
@@ -108,12 +114,23 @@ pub trait ServiceRepository: Send + Sync {
         service: ServicePut,
         service_id: Uuid,
     ) -> Result<Option<ServiceGet>, RepositoryError>;
+    // schedules
+    async fn get_schedules(&self) -> Result<Vec<ScheduleGet>, RepositoryError>;
+    async fn create_schedule(&self, schedule: SchedulePost)
+        -> Result<ScheduleGet, RepositoryError>;
 }
 
 #[async_trait]
 impl<SR: ServiceRepository + ?Sized + 'static> ServiceRepository for Arc<SR> {
     async fn get_all_services(&self) -> Result<Vec<ServiceGet>, RepositoryError> {
         self.as_ref().get_all_services().await
+    }
+
+    async fn get_service_by_id(
+        &self,
+        service_id: Uuid,
+    ) -> Result<Option<ServiceGet>, RepositoryError> {
+        self.as_ref().get_service_by_id(service_id).await
     }
 
     async fn get_service_metadata(
@@ -135,5 +152,17 @@ impl<SR: ServiceRepository + ?Sized + 'static> ServiceRepository for Arc<SR> {
         service_id: Uuid,
     ) -> Result<Option<ServiceGet>, RepositoryError> {
         self.as_ref().update_service(service, service_id).await
+    }
+
+    // schedules
+    async fn get_schedules(&self) -> Result<Vec<ScheduleGet>, RepositoryError> {
+        self.as_ref().get_schedules().await
+    }
+
+    async fn create_schedule(
+        &self,
+        schedule: SchedulePost,
+    ) -> Result<ScheduleGet, RepositoryError> {
+        self.as_ref().create_schedule(schedule).await
     }
 }

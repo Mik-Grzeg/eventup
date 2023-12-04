@@ -1,3 +1,6 @@
+set export
+DATABASE_URL := "postgres://postgres:password@localhost:5432"
+
 # start docker compose environment with default services
 start:
   docker compose up -d --build
@@ -21,3 +24,9 @@ ps:
 # drops to postgresql shell
 psql:
   docker compose exec postgres psql -U postgres
+
+demo-data:
+  docker compose exec postgres psql -U postgres -c "$(cat ./services/users/tests/fixtures/users.sql)"
+  docker compose exec postgres psql -U postgres -c "$(cat ./services/appointments/tests/fixtures/services.sql)"
+  docker compose exec postgres psql -U postgres -c "$(cat ./services/appointments/tests/fixtures/schedules.sql)"
+  docker compose exec postgres psql -U postgres -c "$(cat ./services/appointments/tests/fixtures/appointments.sql)"

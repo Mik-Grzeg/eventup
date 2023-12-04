@@ -4,6 +4,8 @@ use sqlx::FromRow;
 use uuid::Uuid;
 use validator::{Validate, ValidationError, ValidationErrors};
 
+use super::add_field_error;
+
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct AppointmentGet {
     pub appointment_id: Uuid,
@@ -126,13 +128,3 @@ impl AppointmentPut {
     }
 }
 
-fn add_field_error(
-    errors: &mut Result<(), ValidationErrors>,
-    field: &'static str,
-    error: ValidationError,
-) {
-    if errors.is_ok() {
-        *errors = Err(ValidationErrors::new());
-    }
-    errors.as_mut().unwrap_err().add(field, error);
-}

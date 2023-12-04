@@ -13,6 +13,7 @@ pub mod postgres;
 #[async_trait]
 pub trait UserRepository: Send + Sync {
     async fn get_users(&self) -> Result<Vec<UserGet>, RepositoryError>;
+    async fn get_employees(&self) -> Result<Vec<UserGet>, RepositoryError>;
     async fn get_user_by_id(&self, user_id: Uuid) -> Result<Option<UserGet>, RepositoryError>;
     async fn create_user(&self, user: UserPost) -> Result<UserGet, RepositoryError>;
     async fn update_user(
@@ -31,6 +32,10 @@ pub trait UserRepository: Send + Sync {
 impl<UR: UserRepository + ?Sized + 'static> UserRepository for Arc<UR> {
     async fn get_users(&self) -> Result<Vec<UserGet>, RepositoryError> {
         self.as_ref().get_users().await
+    }
+
+    async fn get_employees(&self) -> Result<Vec<UserGet>, RepositoryError> {
+        self.as_ref().get_employees().await
     }
 
     async fn auth_user(

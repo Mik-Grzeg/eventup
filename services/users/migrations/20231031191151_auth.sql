@@ -5,9 +5,7 @@ CREATE TABLE IF NOT EXISTS user_log_infos (
   -- group_id INT,
   email text UNIQUE NOT NULL,
   password_hashed text,
-  password_salt VARCHAR(50),
-  role user_roles NOT NULL DEFAULT 'regular'
-  -- CONSTRAINT fk_group
+  password_salt VARCHAR(50), role user_roles NOT NULL DEFAULT 'regular' -- CONSTRAINT fk_group
   --   FOREIGN KEY(group_id)
   --     REFERENCES groups(group_id)
   -- in case we wanted to migrate to other hashing algorithm, we need to know what was the previous one 
@@ -22,3 +20,4 @@ CREATE TABLE IF NOT EXISTS user_accounts (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
+

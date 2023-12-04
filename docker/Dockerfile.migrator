@@ -15,6 +15,5 @@ COPY --from=builder /sqlx /sqlx
 RUN mkdir migrations
 COPY services/users/migrations/* /migrations
 COPY services/appointments/migrations/* /migrations
-COPY services/company/migrations/* /migrations
 
 ENTRYPOINT /sqlx migrate run
