@@ -40,7 +40,6 @@ paths:
           description: Bad request
         '422':
           description: Unprocessable entity
-
   /users/{user_id}:
     get:
       summary: Get user details by user ID
@@ -101,6 +100,22 @@ paths:
           description: User deleted successfully
         '404':
           description: User not found
+
+  /users/employees:
+    get:
+      summary: Get employee users
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        '404':
+          description: User not found
+
 
 components:
   schemas:
