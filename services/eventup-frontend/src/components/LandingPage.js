@@ -2,6 +2,7 @@
 import React from 'react';
 import ServiceList from './ServiceList';
 import NavigationMenu from './NavigationMenu';
+import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
   const handleMakeAppointment = (serviceId) => {

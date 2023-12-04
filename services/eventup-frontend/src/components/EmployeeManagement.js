@@ -1,3 +1,4 @@
+// EmployeeDEmployeeManagement.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../hooks/AuthContext';
@@ -11,7 +12,6 @@ const EmployeeManagement = () => {
     phone_number: '',
     first_name: '',
     last_name: '',
-    role: 'employee', // Set the role to 'employee'
   });
   const [isEditing, setIsEditing] = useState(false);
   const [employeeModalVisible, setEmployeeModalVisible] = useState(false);
@@ -22,7 +22,7 @@ const EmployeeManagement = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/users', {
+      const response = await axios.get('http://localhost:8080/api/v1/users/employees', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -35,11 +35,17 @@ const EmployeeManagement = () => {
 
   const handleCreateEmployee = async () => {
     try {
-      await axios.post('http://localhost:8080/api/v1/users', selectedEmployee, {
+      const newEmployee = {
+        ...selectedEmployee,
+        role: 'employee', // Add the role field
+      };
+
+      await axios.post('http://localhost:8080/api/v1/users', newEmployee, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
       setEmployeeModalVisible(false);
       fetchEmployees();
     } catch (error) {
@@ -62,7 +68,7 @@ const EmployeeManagement = () => {
     }
   };
 
-  const handleRemoveEmployee = async (employeeId) => {
+  const handleDeleteEmployee = async (employeeId) => {
     try {
       await axios.delete(`http://localhost:8080/api/v1/users/${employeeId}`, {
         headers: {
@@ -71,21 +77,20 @@ const EmployeeManagement = () => {
       });
       fetchEmployees();
     } catch (error) {
-      console.error('Error removing employee:', error);
+      console.error('Error deleting employee:', error);
     }
   };
 
   const handleEditEmployee = (employee) => {
-    const { user_id, role, ...rest } = employee;
-    setSelectedEmployee(rest);
+    setSelectedEmployee(employee);
     setEmployeeModalVisible(true);
     setIsEditing(true);
   };
 
   return (
     <div>
-      <h1>Employee Management</h1>
-      <button onClick={() => { setSelectedEmployee({ email: '', password: '', phone_number: '', first_name: '', last_name: '', role: 'employee' }); setIsEditing(false); setEmployeeModalVisible(true); }}>Add Employee</button>
+      <h2>Employee Management</h2>
+      <button onClick={() => { setSelectedEmployee({ email: '', password: '', phone_number: '', first_name: '', last_name: '' }); setIsEditing(false); setEmployeeModalVisible(true); }}>Add Employee</button>
 
       {/* Display a list of employees */}
       <table>
@@ -107,7 +112,7 @@ const EmployeeManagement = () => {
               <td>{employee.phone_number}</td>
               <td>
                 <button onClick={() => handleEditEmployee(employee)}>Edit</button>
-                <button onClick={() => handleRemoveEmployee(employee.user_id)}>Remove</button>
+                <button onClick={() => handleDeleteEmployee(employee.user_id)}>Delete</button>
               </td>
             </tr>
           ))}
@@ -122,7 +127,7 @@ const EmployeeManagement = () => {
           <label>
             Email:
             <input
-              type="email"
+              type="text"
               value={selectedEmployee.email}
               onChange={(e) => setSelectedEmployee({ ...selectedEmployee, email: e.target.value })}
             />

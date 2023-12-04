@@ -1,7 +1,9 @@
+// ServiceList.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
-const ServiceList = ({ onMakeAppointment }) => {
+const ServiceList = () => {
   const [services, setServices] = useState([]);
 
   useEffect(() => {
@@ -24,7 +26,6 @@ const ServiceList = ({ onMakeAppointment }) => {
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Name</th>
             <th>Duration</th>
             <th>Price</th>
@@ -34,14 +35,14 @@ const ServiceList = ({ onMakeAppointment }) => {
         <tbody>
           {services.map((service) => (
             <tr key={service.service_id}>
-              <td>{service.service_id}</td>
               <td>{service.name}</td>
               <td>{service.duration}</td>
               <td>{service.price}</td>
               <td>
-                <button onClick={() => onMakeAppointment(service.service_id)}>
-                  Make Appointment
-                </button>
+                {/* Link to the AppointmentBookingPage with the selected service ID */}
+                <Link to={`/appointment-booking/${service.service_id}`}>
+                  <button>Make Appointment</button>
+                </Link>
               </td>
             </tr>
           ))}
