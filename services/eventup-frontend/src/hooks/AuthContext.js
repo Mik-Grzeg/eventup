@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   const [userRole, setUserRole] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const login = async (newToken) => {
     setToken(newToken);
@@ -35,29 +36,42 @@ export const AuthProvider = ({ children }) => {
         },
       });
       setUserRole(response.data.role);
+      setIsLoading(false); // Set loading to false when user role is fetched
       return response.data.role;
     } catch (error) {
       console.error('Error fetching user role:', error);
+      setIsLoading(false); // Set loading to false in case of an error
       return null;
     }
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      if (token) {
-        await fetchUserRole(token);
+      // Check if there's a token in session storage
+      const storedToken = sessionStorage.getItem('token');
+      if (storedToken) {
+        // If there's a stored token, set it in the state
+        setToken(storedToken);
+        // Set isAuthenticated to true
+        setIsAuthenticated(true);
+        // Fetch user role
+        await fetchUserRole(storedToken);
+      } else {
+        setIsLoading(false); // Set loading to false if there's no stored token
       }
     };
 
     fetchData();
-  }, [token]);
+  }, []); // Empty dependency array ensures this runs once on mount
 
   const isAdmin = () => userRole === 'admin';
   const isRegularUser = () => userRole === 'regular';
   const isEmployee = () => userRole === 'employee';
 
   return (
-    <AuthContext.Provider value={{ token, userRole, isAuthenticated, login, logout, isAdmin, isRegularUser, isEmployee }}>
+    <AuthContext.Provider
+      value={{ token, userRole, isAuthenticated, isLoading, login, logout, isAdmin, isRegularUser, isEmployee }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -9,7 +9,17 @@ import UserDashboard from './components/UserDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
 
 const App = () => {
-  const { isAuthenticated, isAdmin, isRegularUser, isEmployee } = useAuth();
+  const { isAuthenticated, isAdmin, isRegularUser, isEmployee, isLoading } = useAuth();
+
+  console.log('isAuthenticated:', isAuthenticated);
+  console.log('isAdmin:', isAdmin());
+  console.log('isRegularUser:', isRegularUser());
+  console.log('isEmployee:', isEmployee());
+
+  if (isLoading) {
+    // Render a loading indicator or message while user data is being fetched
+    return <div>Loading...</div>;
+  }
 
   return (
     <Router>
