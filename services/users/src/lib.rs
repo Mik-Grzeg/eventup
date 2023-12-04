@@ -1,4 +1,3 @@
-
 use tracing_subscriber::prelude::*;
 
 pub mod app_state;

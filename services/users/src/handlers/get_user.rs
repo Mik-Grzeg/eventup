@@ -17,12 +17,14 @@ pub async fn get_user(
     State(user_repository): State<Arc<dyn UserRepository>>,
 ) -> Result<Json<UserGet>, PublicError> {
     match user_identifiers {
-        Some(identifiers) if identifiers.id == user_id || identifiers.role == UserRoles::Admin => Ok(Json(
-            user_repository
-                .get_user_by_id(user_id)
-                .await?
-                .ok_or(PublicError::NotFound)?,
-        )),
+        Some(identifiers) if identifiers.id == user_id || identifiers.role == UserRoles::Admin => {
+            Ok(Json(
+                user_repository
+                    .get_user_by_id(user_id)
+                    .await?
+                    .ok_or(PublicError::NotFound)?,
+            ))
+        }
         _ => Err(PublicError::Unauthorized),
     }
 }

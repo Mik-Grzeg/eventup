@@ -25,7 +25,7 @@ pub struct UserPost {
     #[validate]
     pub account: UserAccountPut,
     #[serde(skip_serializing)]
-    pub role: Option<UserRoles>
+    pub role: Option<UserRoles>,
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]

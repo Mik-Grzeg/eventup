@@ -1,10 +1,10 @@
-use std::sync::Arc;
+
 
 use crate::app_state::AppState;
 use auth_extractor::AuthorizationControl;
 use axum::{
     middleware::from_extractor_with_state,
-    routing::{delete, get, post, put},
+    routing::{get, post, put},
     Router,
 };
 

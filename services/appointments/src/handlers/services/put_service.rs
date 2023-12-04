@@ -31,6 +31,6 @@ pub async fn put_service(
                 .await?;
             Ok((StatusCode::OK, Json(service)))
         }
-        _ => return Err(PublicError::Unauthorized),
+        _ => Err(PublicError::Unauthorized),
     }
 }

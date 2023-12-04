@@ -1,4 +1,4 @@
-use appointments_lib::app_state::AppState;
+
 use common_types::{UserIdentifiers, UserRoles};
 use uuid::uuid;
 

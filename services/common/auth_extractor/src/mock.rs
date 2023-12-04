@@ -1,7 +1,7 @@
 use axum::async_trait;
 use axum::http::StatusCode;
 use common_types::UserIdentifiers;
-use httpmock::prelude::*;
+
 use std::sync::Mutex;
 
 use crate::Authorizable;
@@ -39,12 +39,10 @@ impl Authorizable for MockClient {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::{Arc, Mutex};
+    use std::sync::{Arc};
 
     use axum::{
-        async_trait,
         body::Body,
-        debug_handler,
         extract::{FromRef, State},
         http::{Request, StatusCode},
         middleware::from_extractor_with_state,
@@ -56,7 +54,7 @@ mod tests {
 
     use crate::{mock::MockClient, Authorizable, AuthorizationControl};
     use httpmock::MockServer;
-    use tower::{layer::layer_fn, service_fn, Service, ServiceExt};
+    use tower::{ServiceExt};
     use uuid::Uuid;
 
     #[derive(Clone)]

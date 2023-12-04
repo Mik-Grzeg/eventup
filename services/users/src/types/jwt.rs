@@ -17,7 +17,7 @@ impl TryFrom<&str> for LoginTokenRespone {
     type Error = anyhow::Error;
 
     fn try_from(hdr: &str) -> Result<Self, Self::Error> {
-        let mut hdr_parts = hdr.split(" ");
+        let mut hdr_parts = hdr.split(' ');
         let r#type = TokenType::from_str(
             hdr_parts
                 .next()
@@ -75,7 +75,7 @@ pub fn token_is_valid(
     secret: &str,
 ) -> Result<TokenData<JWTClaims>, jsonwebtoken::errors::Error> {
     decode::<JWTClaims>(
-        &token,
+        token,
         &DecodingKey::from_secret(secret.as_ref()),
         &Validation::default(),
     )

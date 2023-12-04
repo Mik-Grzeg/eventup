@@ -8,7 +8,7 @@ use crate::{
 use super::super::errors::PublicError;
 use auth_extractor::AuthorizationControl;
 use axum::{
-    extract::{Path, State},
+    extract::{State},
     Json,
 };
 use common_types::UserRoles;
@@ -21,7 +21,8 @@ pub async fn create_appointment(
     tracing::info!("Requested by user {user_identifiers:?}");
     match user_identifiers {
         Some(identifiers)
-            if (identifiers.role == UserRoles::Admin || identifiers.id == appointment.client_id) =>
+            if (identifiers.role == UserRoles::Admin
+                || identifiers.id == appointment.client_id) =>
         {
             let user_appointments = appointment_repository
                 .create_appointment(&identifiers, appointment)

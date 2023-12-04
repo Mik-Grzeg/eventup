@@ -4,7 +4,7 @@ use crate::{repository::ServiceRepository, types::services::ServiceGet};
 
 use super::super::errors::PublicError;
 use auth_extractor::AuthorizationControl;
-use axum::{debug_handler, extract::State, Json};
+use axum::{extract::State, Json};
 use common_types::UserRoles;
 
 pub async fn get_services(

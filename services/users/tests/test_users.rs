@@ -60,7 +60,10 @@ async fn test_proper_lifecycle(pool: PgPool) {
         .map(Uuid::parse_str)
         .unwrap()
         .unwrap();
-    assert_eq!(body.get("email").unwrap().as_str(), Some("test_user@mail.com"));
+    assert_eq!(
+        body.get("email").unwrap().as_str(),
+        Some("test_user@mail.com")
+    );
     assert_eq!(
         body.get("phone_number").unwrap().as_str(),
         Some("+48123456789")
@@ -107,7 +110,7 @@ async fn test_proper_lifecycle(pool: PgPool) {
         .clone()
         .oneshot(
             Request::builder()
-                .uri(format!("/api/v1/auth/access"))
+                .uri("/api/v1/auth/access".to_string())
                 .header(http::header::AUTHORIZATION, &auth_header)
                 .body(Body::empty())
                 .unwrap(),
@@ -119,7 +122,10 @@ async fn test_proper_lifecycle(pool: PgPool) {
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let body: Value = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(body.get("email").unwrap().as_str(), Some("test_user@mail.com"));
+    assert_eq!(
+        body.get("email").unwrap().as_str(),
+        Some("test_user@mail.com")
+    );
     assert_eq!(body.get("role").unwrap().as_str(), Some("regular"));
     assert_eq!(
         body.get("id").unwrap().as_str(),
@@ -143,7 +149,10 @@ async fn test_proper_lifecycle(pool: PgPool) {
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let body: Value = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(body.get("email").unwrap().as_str(), Some("test_user@mail.com"));
+    assert_eq!(
+        body.get("email").unwrap().as_str(),
+        Some("test_user@mail.com")
+    );
     assert_eq!(
         body.get("phone_number").unwrap().as_str(),
         Some("+48123456789")
@@ -176,7 +185,10 @@ async fn test_proper_lifecycle(pool: PgPool) {
     let body = response.into_body().collect().await.unwrap().to_bytes();
     let body: Value = serde_json::from_slice(&body).unwrap();
 
-    assert_eq!(body.get("email").unwrap().as_str(), Some("test_user@mail.com"));
+    assert_eq!(
+        body.get("email").unwrap().as_str(),
+        Some("test_user@mail.com")
+    );
     assert_eq!(
         body.get("phone_number").unwrap().as_str(),
         Some("+48123456789")
@@ -410,7 +422,7 @@ async fn test_updating_other_user_by_unauthorized_user(pool: PgPool) {
         .oneshot(
             Request::builder()
                 // UUID of the other user
-                .uri(format!("/api/v1/users/b9ee058b-3143-4176-851b-a60cde9d06ed"))
+                .uri("/api/v1/users/b9ee058b-3143-4176-851b-a60cde9d06ed".to_string())
                 .method(Method::PUT)
                 .header(http::header::CONTENT_TYPE, mime::APPLICATION_JSON.as_ref())
                 .header(http::header::AUTHORIZATION, &auth_header)

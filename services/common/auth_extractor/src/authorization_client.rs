@@ -1,6 +1,6 @@
-use std::sync::Arc;
 use axum::{async_trait, http::StatusCode};
 use common_types::UserIdentifiers;
+use std::sync::Arc;
 
 use crate::Authorizable;
 
@@ -60,5 +60,3 @@ impl Authorizable for AuthorizationClient {
         Ok(Some(user_identifiers))
     }
 }
-
-

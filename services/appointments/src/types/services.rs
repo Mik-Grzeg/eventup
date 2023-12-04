@@ -1,6 +1,6 @@
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::types::PgInterval, FromRow};
+use sqlx::{FromRow};
 use uuid::Uuid;
 use validator::Validate;
 

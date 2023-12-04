@@ -60,32 +60,31 @@ impl AppointmentRepository for PostgresRepo {
 
     async fn get_appointment_by_id(
         &self,
-        user_identifiers: &common_types::UserIdentifiers,
-        appointment_id: uuid::Uuid,
+        _user_identifiers: &common_types::UserIdentifiers,
+        _appointment_id: uuid::Uuid,
     ) -> Result<Option<crate::types::appointments::AppointmentGet>, RepositoryError> {
         unimplemented!()
     }
 
     async fn create_appointment(
         &self,
-        user_identifiers: &common_types::UserIdentifiers,
+        _user_identifiers: &common_types::UserIdentifiers,
         appointment: crate::types::appointments::AppointmentPost,
     ) -> Result<AppointmentGet, RepositoryError> {
         let uuid = Uuid::new_v4();
         let now = Utc::now();
 
-        let (duration_in_sec, price, active) =
+        let (duration_in_sec, price, _active) =
             self.get_service_metadata(appointment.service_id).await?;
 
         appointment
             .time
             .validate_with_duration(&Duration::seconds(duration_in_sec as i64))
-            .map_err(|err| RepositoryError::ValidationError(err))?;
+            .map_err(RepositoryError::ValidationError)?;
 
-
-        let expected_price = price * ((appointment.time.start_time - appointment.time.end_time)
-            .num_seconds() as f32
-            / duration_in_sec as f32);
+        let expected_price = price
+            * ((appointment.time.start_time - appointment.time.end_time).num_seconds() as f32
+                / duration_in_sec as f32);
 
         sqlx::query(
             "INSERT INTO appointments (
@@ -148,9 +147,9 @@ impl AppointmentRepository for PostgresRepo {
 
     async fn update_appointment(
         &self,
-        user_identifiers: &common_types::UserIdentifiers,
-        appointment_id: uuid::Uuid,
-        appointment: crate::types::appointments::AppointmentPut,
+        _user_identifiers: &common_types::UserIdentifiers,
+        _appointment_id: uuid::Uuid,
+        _appointment: crate::types::appointments::AppointmentPut,
     ) -> Result<Option<crate::types::appointments::AppointmentGet>, RepositoryError> {
         unimplemented!()
     }
