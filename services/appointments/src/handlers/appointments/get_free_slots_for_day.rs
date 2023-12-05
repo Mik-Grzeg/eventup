@@ -1,6 +1,5 @@
 use std::{
-    collections::{BTreeMap, HashMap},
-    str::FromStr,
+    collections::{HashMap},
     sync::Arc,
 };
 
@@ -11,12 +10,12 @@ use crate::{
 };
 
 use super::super::errors::PublicError;
-use auth_extractor::AuthorizationControl;
+
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
-use chrono::{format::parse_and_remainder, Date, NaiveDate, Utc};
+use chrono::{NaiveDate, Utc};
 use common_types::User;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -52,20 +51,18 @@ pub async fn get_free_slots_for_day(
             .await?,
     ));
     tracing::info!("Queried slots: {slots:?}");
-    
 
     let employees = dbg!(request_client.get::<Vec<User>>().await?);
     tracing::info!("Fetched employees: {employees:?}");
 
     let employees_slots = employees
         .into_iter()
-        .map(|user| {
+        .filter_map(|user| {
             slots.remove(&user.user_id).map(|slots| EmployeeSlots {
                 user,
                 free_slots: slots,
             })
         })
-        .flatten()
         .collect();
 
     Ok(Json(employees_slots))
@@ -77,7 +74,7 @@ fn convert_slots_to_map(schedule_slots: Vec<ScheduleSlot>) -> HashMap<Uuid, Vec<
     for slot in schedule_slots {
         grouped_slots
             .entry(slot.employee_id)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(Slots {
                 slot_start_time: slot.slot_start_time,
                 slot_end_time: slot.slot_end_time,

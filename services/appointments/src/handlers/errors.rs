@@ -40,8 +40,8 @@ impl IntoResponse for PublicError {
             }
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".into()),
             Self::NotFound => (StatusCode::NOT_FOUND, "Not Found".into()),
-            Self::BadRequest(source) => (StatusCode::BAD_REQUEST, source.into()),
-            Self::ExternalClientError { source } => (
+            Self::BadRequest(source) => (StatusCode::BAD_REQUEST, source),
+            Self::ExternalClientError { source: _ } => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal server error".into(),
             ),

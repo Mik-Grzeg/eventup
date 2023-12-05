@@ -1,7 +1,7 @@
 use chrono::{DateTime, NaiveTime, Utc};
 use common_types::User;
 use serde::{Deserialize, Serialize};
-use sqlx::{postgres::types::PgTimeTz, FromRow};
+use sqlx::{FromRow};
 use uuid::Uuid;
 use validator::{ValidationError, ValidationErrors};
 

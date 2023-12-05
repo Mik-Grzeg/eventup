@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::{
     repository::AppointmentRepository,
-    types::appointments::{AppointmentCancel, AppointmentGet, AppointmentPost},
 };
 
 use super::super::errors::PublicError;

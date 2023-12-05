@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
-use axum::extract::{Path, State};
+use axum::extract::{State};
 use axum::response::Json;
-use common_types::{User, UserRoles};
-use uuid::Uuid;
+use common_types::{User};
 
-use crate::middlewares::auth::Authorization;
+
+
 use crate::repository::UserRepository;
-use crate::types::users::UserGet;
+
 
 use super::errors::PublicError;
 

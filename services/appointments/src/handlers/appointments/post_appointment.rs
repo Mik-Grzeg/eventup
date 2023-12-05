@@ -7,10 +7,7 @@ use crate::{
 
 use super::super::errors::PublicError;
 use auth_extractor::AuthorizationControl;
-use axum::{
-    extract::{State},
-    Json,
-};
+use axum::{extract::State, Json};
 use common_types::UserRoles;
 
 pub async fn create_appointment(

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     repository::AppointmentRepository,
-    types::appointments::{AppointmentCancel, AppointmentGet, AppointmentPost},
+    types::appointments::{AppointmentCancel},
 };
 
 use super::super::errors::PublicError;
@@ -11,7 +11,7 @@ use axum::{
     extract::{Path, State},
     Json,
 };
-use common_types::UserRoles;
+
 use uuid::Uuid;
 
 pub async fn cancel_appointment(

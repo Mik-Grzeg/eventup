@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use reqwest::Client;
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::{de::DeserializeOwned};
 
 #[derive(Clone)]
 pub struct ExternalClient {

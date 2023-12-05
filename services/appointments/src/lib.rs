@@ -2,10 +2,10 @@ use tracing_subscriber::prelude::*;
 
 pub mod app_state;
 pub mod config;
+pub mod external_client;
 pub mod handlers;
 pub mod repository;
 pub mod types;
-pub mod external_client;
 
 pub fn init_tracing() {
     tracing_subscriber::registry()

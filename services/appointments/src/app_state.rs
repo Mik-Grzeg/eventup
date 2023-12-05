@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use auth_extractor::authorization_client::AuthorizationClient;
 use axum::extract::FromRef;
-use reqwest::Client;
+
 use sqlx::PgPool;
 
 use crate::{

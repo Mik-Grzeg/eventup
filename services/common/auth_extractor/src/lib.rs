@@ -5,7 +5,6 @@ use axum::{
 };
 use common_types::UserIdentifiers;
 
-
 use std::sync::Arc;
 
 pub mod authorization_client;
