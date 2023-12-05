@@ -9,6 +9,8 @@ export const AuthProvider = ({ children }) => {
   });
 
   const [userRole, setUserRole] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -23,7 +25,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setToken(null);
+    setUserId(null);
     setUserRole(null);
+    setUserEmail(null);
     setIsAuthenticated(false);
     sessionStorage.removeItem('token');
   };
@@ -36,6 +40,8 @@ export const AuthProvider = ({ children }) => {
         },
       });
       setUserRole(response.data.role);
+      setUserId(response.data.id);
+      setUserEmail(response.data.email)
       setIsLoading(false); // Set loading to false when user role is fetched
       return response.data.role;
     } catch (error) {
@@ -70,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ token, userRole, isAuthenticated, isLoading, login, logout, isAdmin, isRegularUser, isEmployee }}
+      value={{ token, userRole, userId, userEmail, isAuthenticated, isLoading, login, logout, isAdmin, isRegularUser, isEmployee }}
     >
       {children}
     </AuthContext.Provider>
