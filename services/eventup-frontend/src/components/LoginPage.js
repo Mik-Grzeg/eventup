@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ const LoginPage = () => {
   const [loginError, setLoginError] = useState(null);
   const { login, isAdmin, isRegularUser, isEmployee } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();  // Change this line
 
   const handleLogin = async () => {
     try {
@@ -18,7 +20,10 @@ const LoginPage = () => {
       console.log('Authentication successful. Token:', response.data.token);
       console.log('Authorization successful. Role:', userRole);
 
-      // Navigate based on user role
+      // Get the intended redirect path from the state
+      const intendedRedirect = location.state?.intendedRedirect;
+
+      // Navigate based on user role or intended redirect path
       if (userRole === 'admin') {
         navigate('/admin');
         console.log('Navigating to /admin');
@@ -29,8 +34,8 @@ const LoginPage = () => {
         navigate('/employee');
         console.log('Navigating to /employee');
       } else {
-        navigate('/');
-        console.log('Navigating to /');
+        navigate(intendedRedirect || '/');
+        console.log(`Navigating to ${intendedRedirect || '/'}`);
       }
     } catch (error) {
       console.error('Login failed:', error);

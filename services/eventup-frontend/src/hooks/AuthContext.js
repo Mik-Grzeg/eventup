@@ -13,6 +13,9 @@ export const AuthProvider = ({ children }) => {
   const [userEmail, setUserEmail] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [userFirstName, setUserFirstName] = useState(null);
+  const [userLastName, setUserLastName] = useState(null);
+  const [userPhoneNumber, setUserPhoneNumber] = useState(null);
 
   const login = async (newToken) => {
     setToken(newToken);
@@ -51,6 +54,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const fetchUserDetails = async (userId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Set user details from the response
+      setUserId(response.data.user_id);
+      setUserEmail(response.data.email);
+      setUserFirstName(response.data.first_name);
+      setUserLastName(response.data.last_name);
+      setUserPhoneNumber(response.data.phone_number);
+
+      return response.data; // Return the entire user details object if needed
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       // Check if there's a token in session storage
@@ -74,9 +98,27 @@ export const AuthProvider = ({ children }) => {
   const isRegularUser = () => userRole === 'regular';
   const isEmployee = () => userRole === 'employee';
 
+
+
   return (
     <AuthContext.Provider
-      value={{ token, userRole, userId, userEmail, isAuthenticated, isLoading, login, logout, isAdmin, isRegularUser, isEmployee }}
+      value={{
+        token,
+        userRole,
+        userId,
+        userEmail,
+        userFirstName,
+        userLastName,
+        userPhoneNumber,
+        isAuthenticated,
+        isLoading,
+        login,
+        logout,
+        isAdmin,
+        isRegularUser,
+        isEmployee,
+        fetchUserDetails,
+      }}
     >
       {children}
     </AuthContext.Provider>
