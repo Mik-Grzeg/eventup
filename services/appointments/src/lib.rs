@@ -5,6 +5,7 @@ pub mod config;
 pub mod handlers;
 pub mod repository;
 pub mod types;
+pub mod external_client;
 
 pub fn init_tracing() {
     tracing_subscriber::registry()

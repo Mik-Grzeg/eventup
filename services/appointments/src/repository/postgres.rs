@@ -1,12 +1,12 @@
 use async_trait::async_trait;
-use chrono::{DateTime, Duration, Utc, NaiveDate};
-use common_types::UserRoles;
+use chrono::{DateTime, Duration, NaiveDate, Utc};
+use common_types::{UserIdentifiers, UserRoles};
 use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::Row;
 use uuid::Uuid;
 
 use crate::config::AppConfig;
-use crate::types::appointments::AppointmentGet;
+use crate::types::appointments::{AppointmentCancel, AppointmentGet};
 use crate::types::schedules::{ScheduleGet, SchedulePost, ScheduleRange, ScheduleSlot};
 use crate::types::services::{update_service, ServiceGet, ServicePost};
 
@@ -96,7 +96,7 @@ impl AppointmentRepository for PostgresRepo {
               AND s.slot_start_time < a.end_time
               AND s.slot_end_time > a.start_time
             WHERE
-              a.appointment_id IS NULL
+              a.appointment_id IS NULL or a.canceled = true 
             ORDER BY
               s.employee_id, s.slot_start_time
         ")
@@ -215,10 +215,60 @@ impl AppointmentRepository for PostgresRepo {
 
         sqlx::query("DELETE FROM appointments WHERE appointment_id = $1")
             .bind(appointment_id)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
 
         tx.commit().await?;
+        Ok(Some(()))
+    }
+
+    async fn cancel_appointment(
+        &self,
+        appointment_id: uuid::Uuid,
+        appointment_cancel: AppointmentCancel,
+        user_identifiers: &UserIdentifiers,
+    ) -> Result<Option<()>, RepositoryError> {
+        let mut tx = self.pool.begin().await?;
+        let Some(user_id) =
+            sqlx::query("SELECT client_id FROM WHERE appointment_id = $1 FOR UPDATE")
+                .bind(appointment_id)
+                .map(|row: PgRow| -> Result<Uuid, RepositoryError> {
+                    Ok(row.try_get("client_id")?)
+                })
+                .fetch_optional(&mut *tx)
+                .await?
+                .transpose()?
+        else {
+            return Ok(None);
+        };
+
+        if !(user_id == user_identifiers.id
+            || user_identifiers.role == UserRoles::Admin
+            || user_identifiers.role == UserRoles::Employee)
+        {
+            return Err(RepositoryError::Unauthorized);
+        }
+
+        sqlx::query("UPDATE appointments SET canceled = true, cancellation_reason = $1, served = false WHERE appointment_id = $2")
+            .bind(appointment_cancel.reason)
+            .bind(appointment_id)
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+        Ok(Some(()))
+    }
+
+    async fn serve_appointment(
+        &self,
+        appointment_id: uuid::Uuid,
+    ) -> Result<Option<()>, RepositoryError> {
+        sqlx::query(
+            "UPDATE appointments SET canceled = false, served = true WHERE appointment_id = $1",
+        )
+        .bind(appointment_id)
+        .execute(&self.pool)
+        .await?;
         Ok(Some(()))
     }
 }

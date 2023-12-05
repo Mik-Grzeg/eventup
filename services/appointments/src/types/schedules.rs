@@ -1,4 +1,5 @@
 use chrono::{DateTime, NaiveTime, Utc};
+use common_types::User;
 use serde::{Deserialize, Serialize};
 use sqlx::{postgres::types::PgTimeTz, FromRow};
 use uuid::Uuid;
@@ -8,9 +9,22 @@ use super::add_field_error;
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 pub struct ScheduleSlot {
-    employee_id: Uuid,
-    slot_start_time: DateTime<Utc>,
-    slot_end_time: DateTime<Utc>,
+    pub employee_id: Uuid,
+    pub slot_start_time: DateTime<Utc>,
+    pub slot_end_time: DateTime<Utc>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct EmployeeSlots {
+    #[serde(flatten)]
+    pub user: User,
+    pub free_slots: Vec<Slots>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Slots {
+    pub slot_start_time: DateTime<Utc>,
+    pub slot_end_time: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]

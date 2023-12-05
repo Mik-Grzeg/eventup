@@ -4,6 +4,8 @@ mod get_employees;
 mod post_user;
 mod put_user;
 
+mod internal_get_employees;
+
 mod access_control;
 mod login;
 

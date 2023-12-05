@@ -9,6 +9,9 @@ pub struct AppConfig {
 
     // access control api url
     pub access_control_url: String,
+
+    // users api url internal url
+    pub employees_url: String,
 }
 
 impl AppConfig {
@@ -30,6 +33,7 @@ impl Default for AppConfig {
             pg_url: "postgres://postgres:password@localhost:5432/".into(),
             pg_max_conn: 5,
             access_control_url: "http://users-api:8080/api/v1/auth/access".into(),
+            employees_url: "http://users-api:8080/internal/api/v1/employees".into(),
         }
     }
 }

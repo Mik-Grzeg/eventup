@@ -14,19 +14,23 @@ use axum::{
 use common_types::UserRoles;
 use uuid::Uuid;
 
-pub async fn cancel_appointment(
+pub async fn serve_appointment(
     AuthorizationControl(user_identifiers): AuthorizationControl,
     Path(appointment_id): Path<Uuid>,
     State(appointment_repository): State<Arc<dyn AppointmentRepository>>,
-    Json(appointment_cancel): Json<AppointmentCancel>,
 ) -> Result<Json<Option<()>>, PublicError> {
     tracing::info!("Requested by user {user_identifiers:?}");
     match user_identifiers {
-        Some(identifiers) => Ok(Json(
-            appointment_repository
-                .cancel_appointment(appointment_id, appointment_cancel, &identifiers)
-                .await?,
-        )),
+        Some(identifiers)
+            if (identifiers.role == UserRoles::Admin
+                || identifiers.role == UserRoles::Employee) =>
+        {
+            Ok(Json(
+                appointment_repository
+                    .serve_appointment(appointment_id)
+                    .await?,
+            ))
+        }
         _ => Err(PublicError::Unauthorized),
     }
 }

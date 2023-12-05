@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use chrono::{DateTime, Utc, NaiveDate};
+use chrono::{DateTime, NaiveDate, Utc};
 use common_types::UserIdentifiers;
 use uuid::Uuid;
 
 use error::RepositoryError;
 
 use crate::types::{
-    appointments::{AppointmentGet, AppointmentPost, AppointmentPut},
+    appointments::{AppointmentCancel, AppointmentGet, AppointmentPost, AppointmentPut},
     schedules::{ScheduleGet, SchedulePost, ScheduleSlot},
     services::{ServiceGet, ServicePost, ServicePut},
 };
@@ -38,6 +38,16 @@ pub trait AppointmentRepository: Send + Sync {
         user_identifiers: &UserIdentifiers,
         appointment_id: Uuid,
     ) -> Result<Option<()>, RepositoryError>;
+    async fn cancel_appointment(
+        &self,
+        appointment_id: uuid::Uuid,
+        appointment_cancel: AppointmentCancel,
+        user_identifiers: &UserIdentifiers,
+    ) -> Result<Option<()>, RepositoryError>;
+    async fn serve_appointment(
+        &self,
+        appointment_id: uuid::Uuid,
+    ) -> Result<Option<()>, RepositoryError>;
 
     async fn get_free_slots_for_day(
         &self,
@@ -60,7 +70,9 @@ impl<AR: AppointmentRepository + ?Sized + 'static> AppointmentRepository for Arc
         datetime: DateTime<Utc>,
         service_id: Uuid,
     ) -> Result<Vec<ScheduleSlot>, RepositoryError> {
-        self.as_ref().get_free_slots_for_day(datetime, service_id).await
+        self.as_ref()
+            .get_free_slots_for_day(datetime, service_id)
+            .await
     }
 
     async fn create_appointment(
@@ -92,6 +104,24 @@ impl<AR: AppointmentRepository + ?Sized + 'static> AppointmentRepository for Arc
         self.as_ref()
             .delete_appointment(user_identifiers, appointment_id)
             .await
+    }
+
+    async fn cancel_appointment(
+        &self,
+        appointment_id: uuid::Uuid,
+        appointment_cancel: AppointmentCancel,
+        user_identifiers: &UserIdentifiers,
+    ) -> Result<Option<()>, RepositoryError> {
+        self.as_ref()
+            .cancel_appointment(appointment_id, appointment_cancel, user_identifiers)
+            .await
+    }
+
+    async fn serve_appointment(
+        &self,
+        appointment_id: uuid::Uuid,
+    ) -> Result<Option<()>, RepositoryError> {
+        self.as_ref().serve_appointment(appointment_id).await
     }
 }
 
