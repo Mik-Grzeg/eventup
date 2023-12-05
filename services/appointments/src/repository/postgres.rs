@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use chrono::{Duration, Utc};
+use chrono::{DateTime, Duration, Utc, NaiveDate};
 use common_types::UserRoles;
 use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::Row;
@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::config::AppConfig;
 use crate::types::appointments::AppointmentGet;
-use crate::types::schedules::{ScheduleGet, SchedulePost, ScheduleRange};
+use crate::types::schedules::{ScheduleGet, SchedulePost, ScheduleRange, ScheduleSlot};
 use crate::types::services::{update_service, ServiceGet, ServicePost};
 
 use super::error::RepositoryError;
@@ -59,12 +59,50 @@ impl AppointmentRepository for PostgresRepo {
         )
     }
 
-    async fn get_appointment_by_id(
+    async fn get_free_slots_for_day(
         &self,
-        _user_identifiers: &common_types::UserIdentifiers,
-        _appointment_id: uuid::Uuid,
-    ) -> Result<Option<crate::types::appointments::AppointmentGet>, RepositoryError> {
-        unimplemented!()
+        datetime: DateTime<Utc>,
+        service_id: Uuid,
+    ) -> Result<Vec<ScheduleSlot>, RepositoryError> {
+        Ok(sqlx::query_as::<_, ScheduleSlot>("
+            WITH ServiceSlots AS (
+              SELECT
+                es.employee_id,
+                generate_series(
+                  greatest(date_trunc('hour', $1) + INTERVAL '1 second' * services.duration_in_sec, date_trunc('day', $1) + es.start_shift::interval) ,
+                  date_trunc('day', $1) + es.end_shift::interval - INTERVAL '1 second' * services.duration_in_sec,
+                  services.duration_in_sec * interval '1 second'
+                ) AS slot_start_time,
+                generate_series(
+                  greatest(date_trunc('hour', $1) + INTERVAL '1 second' * services.duration_in_sec, date_trunc('day', $1) + es.start_shift::interval),
+                  date_trunc('day', $1) + es.end_shift::interval - INTERVAL '1 second' * services.duration_in_sec,
+                  services.duration_in_sec * interval '1 second'
+                ) + services.duration_in_sec * interval '1 second' AS slot_end_time
+              FROM
+                employee_schedules es
+              LEFT JOIN
+                services ON services.service_id = es.service_id
+              WHERE 
+                services.service_id = $2
+            )
+            SELECT
+              s.employee_id,
+              s.slot_start_time,
+              s.slot_end_time
+            FROM
+              ServiceSlots s
+            LEFT JOIN
+              appointments a ON s.employee_id = a.employee_id
+              AND s.slot_start_time < a.end_time
+              AND s.slot_end_time > a.start_time
+            WHERE
+              a.appointment_id IS NULL
+            ORDER BY
+              s.employee_id, s.slot_start_time
+        ")
+            .bind(datetime)
+            .bind(service_id)
+            .fetch_all(&self.pool).await?)
     }
 
     async fn create_appointment(

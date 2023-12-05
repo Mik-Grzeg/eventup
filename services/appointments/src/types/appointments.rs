@@ -58,6 +58,11 @@ impl AppointmentPost {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AppointmentCancel {
+    pub reason: String,
+}
+
 #[derive(Debug, Serialize, Deserialize, Validate)]
 pub struct AppointmentPut {
     #[validate(length(min = 1, max = 255))]

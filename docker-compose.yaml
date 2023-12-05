@@ -67,9 +67,11 @@ services:
     container_name: elb
     image: haproxy
     ports:
-        - "8080:8080"
+      - "8080:8080"
+      - "443:443"
     volumes:
       - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./docker/haproxy/server.pem:/etc/haproxy/certs/server.pem
     links: 
       - appointments-api
       - users-api

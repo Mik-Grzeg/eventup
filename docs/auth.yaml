@@ -3,7 +3,7 @@ info:
   title: Authentication and Authorization API
   version: 1.0.0
 paths:
-  /auth/login:
+  /api/v1/auth/login:
     post:
       summary: User login
       requestBody:
@@ -33,7 +33,7 @@ paths:
         '401':
           description: Unauthorized
 
-  /auth/access:
+  /api/v1/auth/access:
     get:
       summary: Refresh JWT token
       requestBody:

@@ -7,7 +7,9 @@ use axum::{
 };
 
 use super::{
-    appointments::{delete_appointment, get_appointments, post_appointment},
+    appointments::{
+        delete_appointment, get_appointments, get_free_slots_for_day, post_appointment,
+    },
     schedules::{get_schedules, post_schedule},
     services::{get_service, get_services, post_service, put_service},
 };
@@ -24,10 +26,15 @@ pub fn router(app_state: AppState) -> Router {
         .route(
             "/:id",
             put(put_service::put_service).get(get_service::get_service),
+        )
+        .route(
+            "/:id/appointments/free",
+            get(get_free_slots_for_day::get_free_slots_for_day),
         );
 
     let appointments_router = Router::new()
         .route("/", post(post_appointment::create_appointment))
+        .route("/free", get(get_free_slots_for_day::get_free_slots_for_day))
         .route(
             "/:id",
             get(get_appointments::get_appointments_for_user)

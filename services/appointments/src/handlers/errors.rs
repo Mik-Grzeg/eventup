@@ -19,6 +19,8 @@ pub enum PublicError {
     Unauthorized,
     #[error("NotFound")]
     NotFound,
+    #[error("Bad Request")]
+    BadRequest(String)
 }
 
 impl IntoResponse for PublicError {
@@ -33,6 +35,7 @@ impl IntoResponse for PublicError {
             }
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".into()),
             Self::NotFound => (StatusCode::NOT_FOUND, "Not Found".into()),
+            Self::BadRequest(source) => (StatusCode::BAD_REQUEST, source.into())
         }
         .into_response()
     }

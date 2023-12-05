@@ -3,7 +3,7 @@ info:
   title: appointment management api
   version: 1.0.0
 paths:
-  /services:
+  /api/v1/services:
     get:
       summary: get services detail
       responses:
@@ -12,7 +12,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/service"
+                type: array
+                items:
+                  $ref: "#/components/schemas/service"
         '404':
           description: service not found
 
@@ -43,13 +45,15 @@ paths:
                 price:
                   type: number
                   description: the price of the service
+                active:
+                  type: bool
       responses:
         '201':
           description: service created successfully
         '400':
           description: bad request
 
-  /services/{service_id}:
+  /api/v1/services/{service_id}:
     put:
       summary: update service details by service id
       parameters:
@@ -74,7 +78,27 @@ paths:
         '404':
           description: service not found
 
-  /appointments:
+    get:
+      summary: get service detail
+      parameters:
+        - name: service_id
+          in: path
+          required: true
+          description: id of the service to update
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/service"
+        '404':
+          description: service not found
+
+  /api/v1/appointments:
     post:
       summary: create a new appointment
       requestbody:
@@ -89,7 +113,7 @@ paths:
         '400':
           description: bad request
 
-  /appointments/{appointment_id}:
+  /api/v1/appointments/{appointment_id}:
     get:
       summary: get appointment details by appointment id
       parameters:
@@ -120,6 +144,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: service_id
+          in: path
+          required: true
+          description: id of the service to update
+          schema:
+            type: string
+            format: uuid
       requestbody:
         required: true
         content:
@@ -144,11 +175,92 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: service_id
+          in: path
+          required: true
+          description: id of the service to update
+          schema:
+            type: string
+            format: uuid
       responses:
         '204':
           description: appointment deleted successfully
         '404':
           description: appointment not found
+
+  /api/v1/services/{service_id}/appointments/free:
+    get:
+      summary: Get free slots for a given day
+      parameters:
+        - name: date
+          in: query
+          description: "Optional date parameter (format: YYYY-MM-DD)"
+          schema:
+            type: string
+          example: "2023-12-06"
+        - name: service_id
+          in: path
+          required: true
+          description: id of the service to update
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    employee_id:
+                      type: string
+                      format: uuid
+                    slot_start_time:
+                      type: string
+                      format: date-time
+                    slot_end_time:
+                      type: string
+                      format: date-time
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+
+  /api/v1/employee_schedules:
+    get:
+      summary: Get employee schedules
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/scheduleGet"
+        '404':
+          description: Employee schedules not found
+
+    post:
+      summary: Create a new employee schedule
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/schedulePost"
+      responses:
+        '201':
+          description: Employee schedule created successfully
+        '400':
+          description: Bad request
 
 components:
   schemas:
@@ -183,17 +295,12 @@ components:
     AppointmentPost:
       type: object
       required:
-        - service_id
         - client_id
         - client_name
         - employee_id
         - start_time
         - end_time
       properties:
-        service_id:
-          type: string
-          format: uuid
-          description: the id of the service associated with the appointment
         client_id:
           type: string
           format: uuid
@@ -302,3 +409,43 @@ components:
           type: boolean
           description: indicates whether the service has been provided
 
+    schedulePost:
+      type: object
+      properties:
+        employee_id:
+          type: string
+          format: uuid
+          description: The ID of the employee
+        service_id:
+          type: string
+          format: uuid
+          description: The ID of the service
+        start_shift:
+          type: string
+          format: time
+          description: The start shift time
+        end_shift:
+          type: string
+          format: time
+          description: The end shift time
+
+    scheduleGet:
+      type: object
+      properties:
+        schedule_id:
+          type: string
+          format: uuid
+        service_id:
+          type: string
+          format: uuid
+        employee_id:
+          type: string
+          format: uuid
+        start_shift:
+          type: string
+          format: time
+          description: The start shift time
+        end_shift:
+          type: string
+          format: time
+          description: The end shift time

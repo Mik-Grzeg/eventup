@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use chrono::{DateTime, Utc, NaiveDate};
 use common_types::UserIdentifiers;
 use uuid::Uuid;
 
@@ -8,7 +9,7 @@ use error::RepositoryError;
 
 use crate::types::{
     appointments::{AppointmentGet, AppointmentPost, AppointmentPut},
-    schedules::{ScheduleGet, SchedulePost},
+    schedules::{ScheduleGet, SchedulePost, ScheduleSlot},
     services::{ServiceGet, ServicePost, ServicePut},
 };
 
@@ -21,11 +22,6 @@ pub trait AppointmentRepository: Send + Sync {
         &self,
         user_id: &Uuid,
     ) -> Result<Vec<AppointmentGet>, RepositoryError>;
-    async fn get_appointment_by_id(
-        &self,
-        user_id: &UserIdentifiers,
-        appointment_id: Uuid,
-    ) -> Result<Option<AppointmentGet>, RepositoryError>;
     async fn create_appointment(
         &self,
         user_identifiers: &UserIdentifiers,
@@ -42,6 +38,12 @@ pub trait AppointmentRepository: Send + Sync {
         user_identifiers: &UserIdentifiers,
         appointment_id: Uuid,
     ) -> Result<Option<()>, RepositoryError>;
+
+    async fn get_free_slots_for_day(
+        &self,
+        datetime: DateTime<Utc>,
+        service_id: Uuid,
+    ) -> Result<Vec<ScheduleSlot>, RepositoryError>;
 }
 
 #[async_trait]
@@ -53,14 +55,12 @@ impl<AR: AppointmentRepository + ?Sized + 'static> AppointmentRepository for Arc
         self.as_ref().get_user_appointments(user_id).await
     }
 
-    async fn get_appointment_by_id(
+    async fn get_free_slots_for_day(
         &self,
-        user_identifiers: &UserIdentifiers,
-        appointment_id: Uuid,
-    ) -> Result<Option<AppointmentGet>, RepositoryError> {
-        self.as_ref()
-            .get_appointment_by_id(user_identifiers, appointment_id)
-            .await
+        datetime: DateTime<Utc>,
+        service_id: Uuid,
+    ) -> Result<Vec<ScheduleSlot>, RepositoryError> {
+        self.as_ref().get_free_slots_for_day(datetime, service_id).await
     }
 
     async fn create_appointment(

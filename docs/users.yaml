@@ -3,7 +3,7 @@ info:
   title: User Management API
   version: 1.0.0
 paths:
-  /users:
+  /api/v1/users:
     post:
       summary: Create a new user
       requestBody:
@@ -40,7 +40,7 @@ paths:
           description: Bad request
         '422':
           description: Unprocessable entity
-  /users/{user_id}:
+  /api/v1/users/{user_id}:
     get:
       summary: Get user details by user ID
       parameters:
@@ -101,7 +101,7 @@ paths:
         '404':
           description: User not found
 
-  /users/employees:
+  /api/v1/users/employees:
     get:
       summary: Get employee users
       responses:
