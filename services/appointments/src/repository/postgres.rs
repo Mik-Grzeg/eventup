@@ -177,7 +177,7 @@ impl AppointmentRepository for PostgresRepo {
         appointment_id: uuid::Uuid,
     ) -> Result<Option<()>, RepositoryError> {
         let mut tx = self.pool.begin().await?;
-        let Some(user_id) = sqlx::query("SELECT client_id FROM WHERE appointment_id = $1")
+        let Some(user_id) = sqlx::query("SELECT client_id FROM appointments WHERE appointment_id = $1")
             .bind(appointment_id)
             .map(|row: PgRow| -> Result<Uuid, RepositoryError> { Ok(row.try_get("client_id")?) })
             .fetch_optional(&mut *tx)
@@ -208,7 +208,7 @@ impl AppointmentRepository for PostgresRepo {
     ) -> Result<Option<()>, RepositoryError> {
         let mut tx = self.pool.begin().await?;
         let Some(user_id) =
-            sqlx::query("SELECT client_id FROM WHERE appointment_id = $1 FOR UPDATE")
+            sqlx::query("SELECT client_id FROM appointments WHERE appointment_id = $1 FOR UPDATE")
                 .bind(appointment_id)
                 .map(|row: PgRow| -> Result<Uuid, RepositoryError> {
                     Ok(row.try_get("client_id")?)
