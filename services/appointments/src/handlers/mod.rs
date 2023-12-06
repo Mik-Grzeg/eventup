@@ -1,6 +1,6 @@
 mod appointments;
-mod services;
 mod schedules;
+mod services;
 
 mod health;
 

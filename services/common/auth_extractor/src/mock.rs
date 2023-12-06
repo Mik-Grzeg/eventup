@@ -39,7 +39,7 @@ impl Authorizable for MockClient {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::{Arc};
+    use std::sync::Arc;
 
     use axum::{
         body::Body,
@@ -54,7 +54,7 @@ mod tests {
 
     use crate::{mock::MockClient, Authorizable, AuthorizationControl};
     use httpmock::MockServer;
-    use tower::{ServiceExt};
+    use tower::ServiceExt;
     use uuid::Uuid;
 
     #[derive(Clone)]

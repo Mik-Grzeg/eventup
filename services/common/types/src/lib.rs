@@ -22,3 +22,12 @@ pub struct UserIdentifiers {
     pub email: String,
     pub role: UserRoles,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct User {
+    pub user_id: Uuid,
+    pub email: String,
+    pub phone_number: String,
+    pub fist_name: Option<String>,
+    pub last_name: Option<String>,
+}

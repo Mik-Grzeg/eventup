@@ -117,7 +117,7 @@ impl AppointmentTime {
 }
 
 impl AppointmentPut {
-    fn update_existing_appointment(self, existing_appointment: &mut AppointmentGet) {
+    fn _update_existing_appointment(self, existing_appointment: &mut AppointmentGet) {
         if let Some(client_name) = self.client_name {
             existing_appointment.client_name = client_name
         }
@@ -132,4 +132,3 @@ impl AppointmentPut {
         }
     }
 }
-

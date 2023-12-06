@@ -4,10 +4,9 @@ use crate::{
     repository::ServiceRepository,
     types::{
         schedules::{ScheduleGet, SchedulePost},
-        services::{ServiceGet, ServicePost},
     },
 };
-use validator::Validate;
+
 
 use super::super::errors::PublicError;
 use auth_extractor::AuthorizationControl;

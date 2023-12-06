@@ -7,7 +7,10 @@ use axum::{
 
 use tower_http::trace::TraceLayer;
 
-use super::{access_control, delete_user, get_employees, get_user, login, post_user, put_user};
+use super::{
+    access_control, delete_user, get_employees, get_user, internal_get_employees, login, post_user,
+    put_user,
+};
 
 pub fn router(app_state: AppState) -> Router {
     let health_route = Router::new().route("/health", get(super::health::health));
@@ -32,10 +35,18 @@ pub fn router(app_state: AppState) -> Router {
         .route_layer(from_extractor_with_state::<Authorization, AppState>(
             app_state.clone(),
         ))
+        .with_state(app_state.clone());
+
+    let internal_api = Router::new()
+        .route(
+            "/internal/api/v1/employees",
+            get(internal_get_employees::internal_get_employees),
+        )
         .with_state(app_state);
 
     Router::new()
         .nest("/api/v1", api_routes)
+        .merge(internal_api)
         .merge(health_route)
         .layer(TraceLayer::new_for_http())
 }

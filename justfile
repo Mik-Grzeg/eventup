@@ -25,6 +25,14 @@ ps:
 psql:
   docker compose exec postgres psql -U postgres
 
+clean-tables:
+  docker compose exec postgres psql -U postgres -c "TRUNCATE TABLE user_log_infos CASCADE"
+  docker compose exec postgres psql -U postgres -c "TRUNCATE TABLE user_accounts CASCADE"
+  docker compose exec postgres psql -U postgres -c "TRUNCATE TABLE appointments CASCADE"
+  docker compose exec postgres psql -U postgres -c "TRUNCATE TABLE employee_schedules CASCADE"
+  docker compose exec postgres psql -U postgres -c "TRUNCATE TABLE services CASCADE"
+  
+
 demo-data:
   docker compose exec postgres psql -U postgres -c "$(cat ./services/users/tests/fixtures/users.sql)"
   docker compose exec postgres psql -U postgres -c "$(cat ./services/appointments/tests/fixtures/services.sql)"

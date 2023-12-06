@@ -37,10 +37,6 @@ impl IntoResponse for PublicError {
             Self::Unauthenticated => (StatusCode::FORBIDDEN, "Unauthenticated".into()),
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".into()),
             Self::NotFound => (StatusCode::NOT_FOUND, "NotFound".into()),
-            _ => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Internal Server Error".into(),
-            ),
         }
         .into_response()
     }
@@ -59,18 +55,5 @@ impl From<RepositoryError> for (StatusCode, String) {
                 "Internal Server Error".into(),
             ),
         }
-    }
-}
-
-pub enum InternalError {
-    Unauthenticated,
-}
-
-impl IntoResponse for InternalError {
-    fn into_response(self) -> Response {
-        match self {
-            Self::Unauthenticated => (StatusCode::FORBIDDEN, "Unauthenticated"),
-        }
-        .into_response()
     }
 }

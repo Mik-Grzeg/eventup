@@ -4,7 +4,10 @@ use crate::{repository::ServiceRepository, types::services::ServiceGet};
 
 use super::super::errors::PublicError;
 use auth_extractor::AuthorizationControl;
-use axum::{extract::{State, Path}, Json};
+use axum::{
+    extract::{Path, State},
+    Json,
+};
 use common_types::UserRoles;
 use uuid::Uuid;
 

@@ -39,9 +39,12 @@ CREATE TABLE IF NOT EXISTS appointments (
   -- tells whether the service has been canceled/provided
   canceled BOOLEAN NOT NULL DEFAULT false, 
   cancellation_reason TEXT,
-  served BOOLEAN NOT NULL DEFAULT false,
-  UNIQUE(start_time, end_time, employee_id)
+  served BOOLEAN NOT NULL DEFAULT false
 );
+
+CREATE UNIQUE INDEX idx_unique_appointments
+ON appointments (start_time, end_time, employee_id)
+WHERE canceled = false;
 
 CREATE TABLE IF NOT EXISTS employee_schedules (
   schedule_id UUID PRIMARY KEY,

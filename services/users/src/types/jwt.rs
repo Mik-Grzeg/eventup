@@ -73,7 +73,7 @@ pub fn generate_jwt_token(user: &UserIdentifiers, secret: &str) -> String {
     let claims = JWTClaims {
         sub: user.email.clone(),
         id: user.id,
-        role: user.role.clone(),
+        role: user.role,
         exp: (chrono::Utc::now() + chrono::Duration::hours(1)).timestamp(),
     };
 

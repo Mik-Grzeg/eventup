@@ -1,14 +1,22 @@
-use std::{str::FromStr, sync::Arc};
+use std::{
+    collections::{HashMap},
+    sync::Arc,
+};
 
-use crate::{repository::AppointmentRepository, types::schedules::ScheduleSlot};
+use crate::{
+    external_client::ExternalClient,
+    repository::AppointmentRepository,
+    types::schedules::{EmployeeSlots, ScheduleSlot, Slots},
+};
 
 use super::super::errors::PublicError;
-use auth_extractor::AuthorizationControl;
+
 use axum::{
     extract::{Path, Query, State},
     Json,
 };
-use chrono::{format::parse_and_remainder, Date, NaiveDate, Utc};
+use chrono::{NaiveDate, Utc};
+use common_types::User;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -21,7 +29,8 @@ pub async fn get_free_slots_for_day(
     Query(params): Query<Params>,
     Path(service_id): Path<Uuid>,
     State(appointment_repository): State<Arc<dyn AppointmentRepository>>,
-) -> Result<Json<Vec<ScheduleSlot>>, PublicError> {
+    State(request_client): State<ExternalClient>,
+) -> Result<Json<Vec<EmployeeSlots>>, PublicError> {
     let now = Utc::now();
 
     if params.date.is_some_and(|date| date < now.date_naive()) {
@@ -36,9 +45,41 @@ pub async fn get_free_slots_for_day(
         .map(|date| date.and_hms_opt(0, 0, 0).unwrap().and_utc())
         .unwrap_or(now);
 
-    Ok(Json(
+    let mut slots = convert_slots_to_map(dbg!(
         appointment_repository
             .get_free_slots_for_day(datetime, service_id)
             .await?,
-    ))
+    ));
+    tracing::info!("Queried slots: {slots:?}");
+
+    let employees = dbg!(request_client.get::<Vec<User>>().await?);
+    tracing::info!("Fetched employees: {employees:?}");
+
+    let employees_slots = employees
+        .into_iter()
+        .filter_map(|user| {
+            slots.remove(&user.user_id).map(|slots| EmployeeSlots {
+                user,
+                free_slots: slots,
+            })
+        })
+        .collect();
+
+    Ok(Json(employees_slots))
+}
+
+fn convert_slots_to_map(schedule_slots: Vec<ScheduleSlot>) -> HashMap<Uuid, Vec<Slots>> {
+    let mut grouped_slots: HashMap<Uuid, Vec<Slots>> = HashMap::new();
+
+    for slot in schedule_slots {
+        grouped_slots
+            .entry(slot.employee_id)
+            .or_default()
+            .push(Slots {
+                slot_start_time: slot.slot_start_time,
+                slot_end_time: slot.slot_end_time,
+            });
+    }
+
+    grouped_slots
 }

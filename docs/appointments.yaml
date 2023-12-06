@@ -2,6 +2,9 @@ openapi: "3.0.0"
 info:
   title: appointment management api
   version: 1.0.0
+  servers:
+    - url: http://localhost:8080
+    - url: https://localhost:443
 paths:
   /api/v1/services:
     get:
@@ -134,36 +137,36 @@ paths:
         '404':
           description: appointment not found
 
-    put:
-      summary: update appointment details by appointment id
-      parameters:
-        - name: appointment_id
-          in: path
-          required: true
-          description: id of the appointment to update
-          schema:
-            type: string
-            format: uuid
-        - name: service_id
-          in: path
-          required: true
-          description: id of the service to update
-          schema:
-            type: string
-            format: uuid
-      requestbody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AppointmentPut"
-      responses:
-        '200':
-          description: successful operation
-        '400':
-          description: bad request
-        '404':
-          description: appointment not found
+    # put:
+    #   summary: update appointment details by appointment id
+    #   parameters:
+    #     - name: appointment_id
+    #       in: path
+    #       required: true
+    #       description: id of the appointment to update
+    #       schema:
+    #         type: string
+    #         format: uuid
+    #     - name: service_id
+    #       in: path
+    #       required: true
+    #       description: id of the service to update
+    #       schema:
+    #         type: string
+    #         format: uuid
+    #   requestbody:
+    #     required: true
+    #     content:
+    #       application/json:
+    #         schema:
+    #           $ref: "#/components/schemas/AppointmentPut"
+    #   responses:
+    #     '200':
+    #       description: successful operation
+    #     '400':
+    #       description: bad request
+    #     '404':
+    #       description: appointment not found
 
     delete:
       summary: delete appointment by appointment id
@@ -187,6 +190,114 @@ paths:
           description: appointment deleted successfully
         '404':
           description: appointment not found
+
+  /api/v1/appointments/{appointment_id}/cancel:
+    put:
+      summary: Cancel an appointment by appointment ID
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          description: ID of the appointment to cancel
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentCancel"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Appointment canceled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: null
+                  message:
+                    type: string
+                    description: A success message
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        '401':
+          description: Unauthorized
+        '404':
+          description: Appointment not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+
+  /api/v1/appointments/{appointment_id}/serve:
+    put:
+      summary: Serve an appointment by appointment ID
+      parameters:
+        - name: appointment_id
+          in: path
+          required: true
+          description: ID of the appointment to serve
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Appointment served successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: null
+                  message:
+                    type: string
+                    description: A success message
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        '401':
+          description: Unauthorized
+        '404':
+          description: Appointment not found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
 
   /api/v1/services/{service_id}/appointments/free:
     get:
@@ -218,12 +329,27 @@ paths:
                     employee_id:
                       type: string
                       format: uuid
-                    slot_start_time:
+                    email:
                       type: string
-                      format: date-time
-                    slot_end_time:
+                      format: email
+                    phone_number:
                       type: string
-                      format: date-time
+                    first_name: 
+                      type: string
+                    last_name: 
+                      type: string
+                    free_slots:
+                      type: array
+                      items: 
+                        type: object
+                        properties:
+                          slot_start_time:
+                            type: string
+                            format: date-time
+                          slot_end_time:
+                            type: string
+                            format: date-time
+
         '400':
           description: Bad Request
         '401':
@@ -408,6 +534,13 @@ components:
         provided:
           type: boolean
           description: indicates whether the service has been provided
+
+    AppointmentCancel:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason for canceling the appointment
 
     schedulePost:
       type: object

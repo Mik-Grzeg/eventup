@@ -53,6 +53,7 @@ services:
       RUST_PG_URL: postgres://postgres:password@postgres:5432/postgres
       RUST_PG_MAX_CONN: 5
       RUST_ACCESS_CONTROL_URL: "http://users-api:8080/api/v1/auth/access"
+      RUST_EMPLOYEES_URL: "http://users-api:8080/internal/api/v1/employees"
     depends_on: 
       - postgres-migrator
       - users-api
