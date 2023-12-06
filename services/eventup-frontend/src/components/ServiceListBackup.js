@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { useAuth } from '../hooks/AuthContext';
+import { useAuth } from '../hooks/AuthContext'; 
 
 const ServiceList = () => {
   const [services, setServices] = useState([]);
@@ -58,7 +58,7 @@ const ServiceList = () => {
       console.error('Please select a service');
       return;
     }
-
+    
     const formattedDate = selectedDate.toISOString().split('T')[0];
 
     try {
@@ -120,6 +120,7 @@ const ServiceList = () => {
     }
   };
 
+
   return (
     <div>
       <h2>List of Available Services</h2>
@@ -145,13 +146,11 @@ const ServiceList = () => {
                 <DatePicker selected={selectedDate} onChange={(date) => setSelectedDate(date)} />
               </td>
               <td>
-                <button
-                  onClick={() => {
-                    handleShowSlots(service.service_id);
-                    setSelectedService(service.service_id);
-                    setSelectedServiceName(service.name);
-                  }}
-                >
+                <button onClick={() => {
+                  handleShowSlots(service.service_id);
+                  setSelectedService(service.service_id); // Set the selected service
+                  setSelectedServiceName(service.name)
+                }}>
                   Show Slots
                 </button>
               </td>
@@ -161,59 +160,53 @@ const ServiceList = () => {
       </table>
 
       {/* Display available slots for each employee */}
-      {/* Display available slots for each employee */}
       {availableSlots.length > 0 && (
         <div>
           <h3>{`Available slots for ${selectedServiceName}`}</h3>
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Surname</th>
-                <th>Email</th>
-                <th>Phone Number</th>
+                <th>Employee ID</th>
                 <th>Date</th>
                 <th>Time Range</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {availableSlots.map((employee) => (
-                <tr key={employee.user_id}>
-                  <td>{employee.fist_name}</td>
-                  <td>{employee.last_name}</td>
-                  <td>{employee.email}</td>
-                  <td>{employee.phone_number}</td>
-                  <td>{new Date(employee.free_slots[0].slot_start_time).toLocaleDateString()}</td>
-                  <td>
-                    <select
-                      onChange={(e) => {
-                        setSelectedEmployee(employee.user_id);
-                        setSelectedTimeRange(e.target.value);
-                      }}
-                      value={employee.free_slots[0].slot_start_time + ' - ' + employee.free_slots[0].slot_end_time}
-                    >
-                      {employee.free_slots.map((slot) => (
-                        <option
-                          key={slot.slot_start_time}
-                          value={`${slot.slot_start_time} - ${slot.slot_end_time}`}
-                        >
-                          {`${new Date(slot.slot_start_time).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })} - ${new Date(slot.slot_end_time).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}`}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <button onClick={handleMakeAppointment}>Make Appointment</button>
-                  </td>
-                </tr>
-              ))}
+              {Array.from(new Set(availableSlots.map((slot) => slot.employee_id))).map(
+                (employeeId) => (
+                  <tr key={employeeId}>
+                    <td>{employeeId}</td>
+                    <td>{new Date(availableSlots[0].slot_start_time).toLocaleDateString()}</td>
+                    <td>
+                      {/* Render dropdown with available slots for the selected employee */}
+                      <select
+                        onChange={(e) => {
+                          setSelectedEmployee(employeeId);
+                          setSelectedTimeRange(e.target.value);
+                        }}
+                      >
+                        {availableSlots
+                          .filter((s) => s.employee_id === employeeId)
+                          .map((s) => (
+                            <option key={s.slot_start_time} value={`${s.slot_start_time} - ${s.slot_end_time}`}>
+                              {`${new Date(s.slot_start_time).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })} - ${new Date(s.slot_end_time).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}`}
+                            </option>
+                          ))}
+                      </select>
+                    </td>
+                    <td>
+                      <button onClick={handleMakeAppointment}>Make Appointment</button>
+                    </td>
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         </div>

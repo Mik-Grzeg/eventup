@@ -1,170 +1,186 @@
-// EmployeeDashboard.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../hooks/AuthContext';
+import Logout from './Logout';
 
 const EmployeeDashboard = () => {
-  const { token } = useAuth();
-  const [employees, setEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState({
-    email: '',
-    password: '',
-    phone_number: '',
-    first_name: '',
-    last_name: '',
+  const { logout, userId, token } = useAuth();
+  const [appointments, setAppointments] = useState([]);
+  const [shiftDetails, setShiftDetails] = useState({
+    startShift: null,
+    endShift: null,
   });
-  const [isEditing, setIsEditing] = useState(false);
-  const [employeeModalVisible, setEmployeeModalVisible] = useState(false);
+  const [newShiftDetails, setNewShiftDetails] = useState({
+    employee_id: userId,
+    service_id: '',
+    start_shift: '',
+    end_shift: '',
+  });
+  const [services, setServices] = useState([]);
 
   useEffect(() => {
-    fetchEmployees();
+    fetchAppointments();
+    fetchShiftDetails();
+    fetchServices();
   }, []);
 
-  const fetchEmployees = async () => {
+  const fetchAppointments = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/users/employees', {
+      const response = await axios.get(`http://localhost:8080/api/v1/appointments/employee/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setEmployees(response.data);
+      setAppointments(response.data);
     } catch (error) {
-      console.error('Error fetching employees:', error);
+      console.error('Error fetching appointments:', error);
     }
   };
 
-  const handleCreateEmployee = async () => {
+  const fetchShiftDetails = async () => {
     try {
-      await axios.post('http://localhost:8080/api/v1/users', selectedEmployee, {
+      const response = await axios.get(`http://localhost:8080/api/v1/employees/${userId}/shift`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setEmployeeModalVisible(false);
-      fetchEmployees();
+      setShiftDetails({
+        startShift: response.data.start_shift,
+        endShift: response.data.end_shift,
+      });
     } catch (error) {
-      console.error('Error creating employee:', error);
+      console.error('Error fetching shift details:', error);
     }
   };
 
-  const handleUpdateEmployee = async () => {
+  const fetchServices = async () => {
     try {
-      await axios.put(`http://localhost:8080/api/v1/users/${selectedEmployee.user_id}`, selectedEmployee, {
+      const response = await axios.get('http://localhost:8080/api/v1/services');
+      setServices(response.data);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
+  };
+
+  const cancelAppointment = async (appointmentId) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/v1/appointments/${appointmentId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setEmployeeModalVisible(false);
-      setIsEditing(false);
-      fetchEmployees();
+      fetchAppointments();
     } catch (error) {
-      console.error('Error updating employee:', error);
+      console.error('Error canceling appointment:', error);
     }
   };
 
-  const handleDeleteEmployee = async (employeeId) => {
+  const editShiftDetails = async (newShiftDetails) => {
     try {
-      await axios.delete(`http://localhost:8080/api/v1/users/${employeeId}`, {
+      await axios.put(`http://localhost:8080/api/v1/employees/${userId}/shift`, newShiftDetails, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      fetchEmployees();
+      fetchShiftDetails();
     } catch (error) {
-      console.error('Error deleting employee:', error);
+      console.error('Error editing shift details:', error);
     }
   };
 
-  const handleEditEmployee = (employee) => {
-    setSelectedEmployee(employee);
-    setEmployeeModalVisible(true);
-    setIsEditing(true);
+  const createShiftDetails = async () => {
+    try {
+      await axios.post(`http://localhost:8080/api/v1/employees/${userId}/shift`, newShiftDetails, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      fetchShiftDetails();
+    } catch (error) {
+      console.error('Error creating shift details:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewShiftDetails((prevDetails) => ({ ...prevDetails, [name]: value }));
   };
 
   return (
     <div>
-      <h2>Employee Dashboard</h2>
-      <button onClick={() => { setSelectedEmployee({ email: '', password: '', phone_number: '', first_name: '', last_name: '' }); setIsEditing(false); setEmployeeModalVisible(true); }}>Add Employee</button>
+      <h1>Employee Dashboard</h1>
 
-      {/* Display a list of employees */}
-      <table>
-        <thead>
-          <tr>
-            <th>Email</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Phone Number</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map((employee) => (
-            <tr key={employee.user_id}>
-              <td>{employee.email}</td>
-              <td>{employee.first_name}</td>
-              <td>{employee.last_name}</td>
-              <td>{employee.phone_number}</td>
-              <td>
-                <button onClick={() => handleEditEmployee(employee)}>Edit</button>
-                <button onClick={() => handleDeleteEmployee(employee.user_id)}>Delete</button>
-              </td>
-            </tr>
+      {/* Display upcoming appointments */}
+      <div>
+        <h2>Upcoming Appointments</h2>
+        <ul>
+          {appointments.map((appointment) => (
+            <li key={appointment.appointment_id}>
+              {`${appointment.client_name} - ${appointment.start_time}`}
+              <button onClick={() => cancelAppointment(appointment.appointment_id)}>
+                Cancel Appointment
+              </button>
+            </li>
           ))}
-        </tbody>
-      </table>
+        </ul>
+      </div>
 
-      {/* Employee Modal */}
-      {employeeModalVisible && (
-        <div>
-          <h3>{isEditing ? 'Edit Employee' : 'Add Employee'}</h3>
-          {/* Input fields for creating/editing employee */}
-          <label>
-            Email:
-            <input
-              type="text"
-              value={selectedEmployee.email}
-              onChange={(e) => setSelectedEmployee({ ...selectedEmployee, email: e.target.value })}
-            />
-          </label>
-          <label>
-            Password:
-            <input
-              type="password"
-              value={selectedEmployee.password}
-              onChange={(e) => setSelectedEmployee({ ...selectedEmployee, password: e.target.value })}
-            />
-          </label>
-          <label>
-            First Name:
-            <input
-              type="text"
-              value={selectedEmployee.first_name}
-              onChange={(e) => setSelectedEmployee({ ...selectedEmployee, first_name: e.target.value })}
-            />
-          </label>
-          <label>
-            Last Name:
-            <input
-              type="text"
-              value={selectedEmployee.last_name}
-              onChange={(e) => setSelectedEmployee({ ...selectedEmployee, last_name: e.target.value })}
-            />
-          </label>
-          <label>
-            Phone Number:
-            <input
-              type="text"
-              value={selectedEmployee.phone_number}
-              onChange={(e) => setSelectedEmployee({ ...selectedEmployee, phone_number: e.target.value })}
-            />
-          </label>
+      {/* Display past appointments */}
+      <div>
+        <h2>Past Appointments</h2>
+        <ul>{/* Similar to the upcoming appointments section */}</ul>
+      </div>
 
-          <button onClick={isEditing ? handleUpdateEmployee : handleCreateEmployee}>
-            Save
-          </button>
-          <button onClick={() => setEmployeeModalVisible(false)}>Cancel</button>
-        </div>
-      )}
+      {/* Display and edit shift details */}
+      <div>
+        <h2>Shift Details</h2>
+        <p>{`Start Shift: ${shiftDetails.startShift}`}</p>
+        <p>{`End Shift: ${shiftDetails.endShift}`}</p>
+
+        {/* Form for creating new shift details */}
+        <form onSubmit={(e) => { e.preventDefault(); createShiftDetails(); }}>
+          <label>
+            Service:
+            <select
+              name="service_id"
+              value={newShiftDetails.service_id}
+              onChange={handleInputChange}
+            >
+              <option value="">Select a Service</option>
+              {services.map((service) => (
+                <option key={service.service_id} value={service.service_id}>
+                  {service.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Start Shift:
+            <input
+              type="time"
+              name="start_shift"
+              value={newShiftDetails.start_shift}
+              onChange={handleInputChange}
+            />
+          </label>
+          <label>
+            End Shift:
+            <input
+              type="time"
+              name="end_shift"
+              value={newShiftDetails.end_shift}
+              onChange={handleInputChange}
+            />
+          </label>
+          <button type="submit">Create Shift</button>
+        </form>
+
+        {/* Button for editing shift details */}
+        <button onClick={() => editShiftDetails(newShiftDetails)}>Edit Shift</button>
+      </div>
+
+      {/* Your employee-specific content goes here */}
+      <Logout />
     </div>
   );
 };
