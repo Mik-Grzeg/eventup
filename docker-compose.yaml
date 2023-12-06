@@ -4,8 +4,6 @@ volumes:
   redpanda-0: null
   postgres: null
   clickhouse: null
-include:
-  - ./docker/clickhouse/cluster_2s_2r/docker-compose.yaml
 services:
 
   # Frontend
@@ -22,7 +20,7 @@ services:
     container_name: postgres-migrator
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/postgres
-    depends_on: 
+    depends_on:
       - postgres
 
   # Applications
@@ -30,17 +28,17 @@ services:
     build:
       dockerfile: docker/Dockerfile
       target: users
-      args: 
+      args:
         DEBUG: debug
     environment:
       RUST_PG_URL: postgres://postgres:password@postgres:5432/postgres
       RUST_PG_MAX_CONN: 5
       RUST_SECRET_KEY: "secret-key"
-    depends_on: 
+    depends_on:
       - postgres-migrator
 
     container_name: users-api
-    ports: 
+    ports:
       - 9080:8080
 
   appointments-api:
@@ -54,15 +52,15 @@ services:
       RUST_PG_MAX_CONN: 5
       RUST_ACCESS_CONTROL_URL: "http://users-api:8080/api/v1/auth/access"
       RUST_EMPLOYEES_URL: "http://users-api:8080/internal/api/v1/employees"
-    depends_on: 
+    depends_on:
       - postgres-migrator
       - users-api
 
     container_name: appointments-api
-    ports: 
+    ports:
       - 9081:8080
 
-  
+
   # Proxy
   elb:
     container_name: elb
@@ -73,7 +71,7 @@ services:
     volumes:
       - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
       - ./docker/haproxy/server.pem:/etc/haproxy/certs/server.pem
-    links: 
+    links:
       - appointments-api
       - users-api
       - frontend

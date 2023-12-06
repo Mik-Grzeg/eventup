@@ -82,7 +82,7 @@ impl AppointmentRepository for PostgresRepo {
                 employee_schedules es
               LEFT JOIN
                 services ON services.service_id = es.service_id
-              WHERE 
+              WHERE
                 services.service_id = $2
             )
             SELECT
@@ -96,7 +96,7 @@ impl AppointmentRepository for PostgresRepo {
               AND s.slot_start_time < a.end_time
               AND s.slot_end_time > a.start_time
             WHERE
-              a.appointment_id IS NULL or a.canceled = true 
+              a.appointment_id IS NULL or a.canceled = true
             ORDER BY
               s.employee_id, s.slot_start_time
         ")
@@ -126,29 +126,7 @@ impl AppointmentRepository for PostgresRepo {
                 / duration_in_sec as f32);
 
         sqlx::query(
-            "INSERT INTO appointments (
-                appointment_id,
-                service_id,
-                employee_id,
-                client_id,
-                client_name,
-                start_time,
-                end_time,
-                price_expected,
-                created_at,
-                updated_at
-            ) VALUES (
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?
-)",
+            "INSERT INTO appointments (appointment_id, service_id, employee_id, client_id, client_name, start_time, end_time, price_expected, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
         )
         .bind(uuid)
         .bind(appointment.service_id)
