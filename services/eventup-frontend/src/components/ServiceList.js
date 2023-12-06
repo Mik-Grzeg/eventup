@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/AuthContext';
 const ServiceList = () => {
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
+  const [selectedServiceName, setSelectedServiceName] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [availableSlots, setAvailableSlots] = useState([]);
   const [employeeAppointments, setEmployeeAppointments] = useState({});
@@ -57,7 +58,7 @@ const ServiceList = () => {
       console.error('Please select a service');
       return;
     }
-
+    
     const formattedDate = selectedDate.toISOString().split('T')[0];
 
     try {
@@ -148,6 +149,7 @@ const ServiceList = () => {
                 <button onClick={() => {
                   handleShowSlots(service.service_id);
                   setSelectedService(service.service_id); // Set the selected service
+                  setSelectedServiceName(service.name)
                 }}>
                   Show Slots
                 </button>
@@ -160,7 +162,7 @@ const ServiceList = () => {
       {/* Display available slots for each employee */}
       {availableSlots.length > 0 && (
         <div>
-          <h3>Available Slots</h3>
+          <h3>{`Available slots for ${selectedServiceName}`}</h3>
           <table>
             <thead>
               <tr>
