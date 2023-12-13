@@ -26,21 +26,21 @@ const UserDashboard = () => {
     fetchAppointments();
   }, [token]);
 
-  const endAppointment = async (appointmentId) => {
+  const cancelAppointment = async (appointmentId) => {
     try {
-      await axios.post(
-        `http://localhost:8080/api/v1/appointments/${appointmentId}/end`,
-        {},
+      await axios.put(
+        `http://localhost:8080/api/v1/appointments/${appointmentId}/cancel`,
+        { reason: "Your cancellation reason here" }, // Replace with the actual reason for cancellation
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      // Update the list of appointments after ending one
+      // Update the list of appointments after canceling one
       fetchAppointments();
     } catch (error) {
-      console.error('Error ending appointment:', error);
+      console.error('Error canceling appointment:', error);
     }
   };
 
@@ -55,23 +55,21 @@ const UserDashboard = () => {
       <table>
         <thead>
           <tr>
-            <th>Appointment ID</th>
             <th>Client Name</th>
-            <th>Start Time</th>
-            <th>End Time</th>
+            <th>Date</th>
+            <th>Time Range</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {appointments.map((appointment) => (
             <tr key={appointment.appointment_id}>
-              <td>{appointment.appointment_id}</td>
               <td>{appointment.client_name}</td>
-              <td>{appointment.start_time}</td>
-              <td>{appointment.end_time}</td>
+              <td>{new Date(appointment.start_time).toLocaleDateString()}</td>
+              <td>{`${new Date(appointment.start_time).toLocaleTimeString()} - ${new Date(appointment.end_time).toLocaleTimeString()}`}</td>
               <td>
-                <button onClick={() => endAppointment(appointment.appointment_id)}>
-                  End Appointment
+                <button onClick={() => cancelAppointment(appointment.appointment_id)}>
+                  Cancel Appointment
                 </button>
               </td>
             </tr>

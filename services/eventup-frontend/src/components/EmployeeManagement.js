@@ -1,4 +1,4 @@
-// EmployeeDEmployeeManagement.js
+// EmployeeManagement.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../hooks/AuthContext';
@@ -129,10 +129,11 @@ const EmployeeManagement = () => {
             <input
               type="text"
               value={selectedEmployee.email}
-              onChange={(e) => setSelectedEmployee({ ...selectedEmployee, email: e.target.value })}
+              readOnly   // Make the email non-editable
             />
           </label>
-          <label>
+          {/* Commented out password and phone number fields */}
+          {/* <label>
             Password:
             <input
               type="password"
@@ -140,6 +141,14 @@ const EmployeeManagement = () => {
               onChange={(e) => setSelectedEmployee({ ...selectedEmployee, password: e.target.value })}
             />
           </label>
+          <label>
+            Phone Number:
+            <input
+              type="text"
+              value={selectedEmployee.phone_number}
+              onChange={(e) => setSelectedEmployee({ ...selectedEmployee, phone_number: e.target.value })}
+            />
+          </label> */}
           <label>
             First Name:
             <input
@@ -154,14 +163,6 @@ const EmployeeManagement = () => {
               type="text"
               value={selectedEmployee.last_name}
               onChange={(e) => setSelectedEmployee({ ...selectedEmployee, last_name: e.target.value })}
-            />
-          </label>
-          <label>
-            Phone Number:
-            <input
-              type="text"
-              value={selectedEmployee.phone_number}
-              onChange={(e) => setSelectedEmployee({ ...selectedEmployee, phone_number: e.target.value })}
             />
           </label>
 
