@@ -49,7 +49,7 @@ WHERE canceled = false;
 CREATE TABLE IF NOT EXISTS employee_schedules (
   schedule_id UUID PRIMARY KEY,
   employee_id UUID NOT NULL,
-  service_id UUID NOT NULL,
+  service_id UUID REFERENCES services (service_id),
   start_shift TIME NOT NULL, 
   end_shift TIME NOT NULL,
   UNIQUE(employee_id, service_id)

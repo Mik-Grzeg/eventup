@@ -1,9 +1,12 @@
 use common_types::{UserIdentifiers, UserRoles};
+use tracing_subscriber::EnvFilter;
 use uuid::uuid;
 
 pub fn init_tracing() {
+    let filter = tracing_subscriber::EnvFilter::from_default_env();
+
     let subscriber = tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
+        .with_env_filter(filter)
         .finish();
     let _ = tracing::subscriber::set_global_default(subscriber);
 }
