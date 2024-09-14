@@ -26,21 +26,21 @@ const UserDashboard = () => {
     fetchAppointments();
   }, [token]);
 
-  const cancelAppointment = async (appointmentId) => {
+  const endAppointment = async (appointmentId) => {
     try {
-      await axios.put(
-        `http://localhost:8080/api/v1/appointments/${appointmentId}/cancel`,
-        { reason: "Your cancellation reason here" }, // Replace with the actual reason for cancellation
+      await axios.post(
+        `http://localhost:8080/api/v1/appointments/${appointmentId}/end`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      // Update the list of appointments after canceling one
+      // Update the list of appointments after ending one
       fetchAppointments();
     } catch (error) {
-      console.error('Error canceling appointment:', error);
+      console.error('Error ending appointment:', error);
     }
   };
 
@@ -55,21 +55,23 @@ const UserDashboard = () => {
       <table>
         <thead>
           <tr>
+            <th>Appointment ID</th>
             <th>Client Name</th>
-            <th>Date</th>
-            <th>Time Range</th>
+            <th>Start Time</th>
+            <th>End Time</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {appointments.map((appointment) => (
             <tr key={appointment.appointment_id}>
+              <td>{appointment.appointment_id}</td>
               <td>{appointment.client_name}</td>
-              <td>{new Date(appointment.start_time).toLocaleDateString()}</td>
-              <td>{`${new Date(appointment.start_time).toLocaleTimeString()} - ${new Date(appointment.end_time).toLocaleTimeString()}`}</td>
+              <td>{appointment.start_time}</td>
+              <td>{appointment.end_time}</td>
               <td>
-                <button onClick={() => cancelAppointment(appointment.appointment_id)}>
-                  Cancel Appointment
+                <button onClick={() => endAppointment(appointment.appointment_id)}>
+                  End Appointment
                 </button>
               </td>
             </tr>

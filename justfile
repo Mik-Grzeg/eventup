@@ -7,6 +7,9 @@ start:
 
 start-apps:
   docker compose up -d --build users-api
+
+docs:
+  docker compose up -d docs
 # delete all docker compose default services 
 down:
   docker compose down -v
