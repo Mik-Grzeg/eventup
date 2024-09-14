@@ -39,11 +39,11 @@ paths:
   /api/v1/auth/access:
     get:
       summary: Refresh JWT token
-      requestBody:
-        required: true
-        content:
+      # requestBody:
+      #   required: true
+      #   content:
       security:
-        - JWT
+        - JWT: []
       responses:
         '200':
           description: Access control
