@@ -155,6 +155,6 @@ services:
   docs:
     image: nginx:1.21-alpine
     volumes:
-      - ./docs/:/usr/share/nginx/html/:rw
+      - ./docs/:/usr/share/nginx/html/api/docs:rw
     ports:
       - 9601:80
