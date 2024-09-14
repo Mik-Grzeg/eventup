@@ -11,7 +11,7 @@ const UserDashboard = () => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/appointments/${userId}`, {
+      const response = await axios.get(`http://rest.yuadgroup.uk/api/v1/appointments/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -29,7 +29,7 @@ const UserDashboard = () => {
   const endAppointment = async (appointmentId) => {
     try {
       await axios.post(
-        `http://localhost:8080/api/v1/appointments/${appointmentId}/end`,
+        `http://rest.yuadgroup.uk/api/v1/appointments/${appointmentId}/end`,
         {},
         {
           headers: {

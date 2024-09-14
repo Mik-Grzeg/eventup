@@ -63,7 +63,7 @@ const AdminDashboard = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/services', {
+      const response = await axios.get('http://rest.yuadgroup.uk/api/v1/services', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
         duration_in_sec: Number(selectedService.duration_in_sec),
         price: Number(selectedService.price),
       };
-      await axios.post('http://localhost:8080/api/v1/services', numericService, {
+      await axios.post('http://rest.yuadgroup.uk/api/v1/services', numericService, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -100,7 +100,7 @@ const AdminDashboard = () => {
         duration_in_sec: Number(selectedService.duration_in_sec),
         price: Number(selectedService.price),
       };
-      await axios.put(`http://localhost:8080/api/v1/services/${selectedService.service_id}`, numericService, {
+      await axios.put(`http://rest.yuadgroup.uk/api/v1/services/${selectedService.service_id}`, numericService, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -117,7 +117,7 @@ const AdminDashboard = () => {
     try {
       const updatedService = { ...service, active: !service.active };
       setSelectedService(updatedService);
-      await axios.put(`http://localhost:8080/api/v1/services/${service.service_id}`, updatedService, {
+      await axios.put(`http://rest.yuadgroup.uk/api/v1/services/${service.service_id}`, updatedService, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserRole = async (currentToken) => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/auth/access', {
+      const response = await axios.get('http://rest.yuadgroup.uk/api/v1/auth/access', {
         headers: {
           Authorization: `Bearer ${currentToken}`,
         },
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserDetails = async (userId) => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/users/${userId}`, {
+      const response = await axios.get(`http://rest.yuadgroup.uk/api/v1/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

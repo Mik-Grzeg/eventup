@@ -26,7 +26,7 @@ const EmployeeDashboard = () => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/appointments/employee/${userId}`, {
+      const response = await axios.get(`http://rest.yuadgroup.uk/api/v1/appointments/employee/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -39,7 +39,7 @@ const EmployeeDashboard = () => {
 
   const fetchShiftDetails = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/employees/${userId}/shift`, {
+      const response = await axios.get(`http://rest.yuadgroup.uk/api/v1/employees/${userId}/shift`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +55,7 @@ const EmployeeDashboard = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/services');
+      const response = await axios.get('http://rest.yuadgroup.uk/api/v1/services');
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -64,7 +64,7 @@ const EmployeeDashboard = () => {
 
   const cancelAppointment = async (appointmentId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/v1/appointments/${appointmentId}`, {
+      await axios.delete(`http://rest.yuadgroup.uk/api/v1/appointments/${appointmentId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -77,7 +77,7 @@ const EmployeeDashboard = () => {
 
   const editShiftDetails = async (newShiftDetails) => {
     try {
-      await axios.put(`http://localhost:8080/api/v1/employees/${userId}/shift`, newShiftDetails, {
+      await axios.put(`http://rest.yuadgroup.uk/api/v1/employees/${userId}/shift`, newShiftDetails, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,7 +90,7 @@ const EmployeeDashboard = () => {
 
   const createShiftDetails = async () => {
     try {
-      await axios.post(`http://localhost:8080/api/v1/employees/${userId}/shift`, newShiftDetails, {
+      await axios.post(`http://rest.yuadgroup.uk/api/v1/employees/${userId}/shift`, newShiftDetails, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -32,7 +32,7 @@ const ServiceList = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/services');
+      const response = await axios.get('http://rest.yuadgroup.uk/api/v1/services');
       setServices(response.data);
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -41,7 +41,7 @@ const ServiceList = () => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/appointments');
+      const response = await axios.get('http://rest.yuadgroup.uk/api/v1/appointments');
       setEmployeeAppointments(response.data);
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -63,7 +63,7 @@ const ServiceList = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/v1/services/${serviceId}/appointments/free`,
+        `http://rest.yuadgroup.uk/api/v1/services/${serviceId}/appointments/free`,
         {
           params: { date: formattedDate },
         }
@@ -105,7 +105,7 @@ const ServiceList = () => {
       };
 
       // Make an appointment with the selected data
-      const response = await axios.post('http://localhost:8080/api/v1/appointments', appointmentData, {
+      const response = await axios.post('http://rest.yuadgroup.uk/api/v1/appointments', appointmentData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -14,7 +14,7 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/auth/login', { email, password });
+      const response = await axios.post('http://rest.yuadgroup.uk/api/v1/auth/login', { email, password });
       const userRole = await login(response.data.token);
 
       console.log('Authentication successful. Token:', response.data.token);

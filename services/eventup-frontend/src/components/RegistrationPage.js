@@ -13,7 +13,7 @@ const RegistrationPage = () => {
 
   const handleRegister = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/users', {
+      const response = await axios.post('http://rest.yuadgroup.uk/api/v1/users', {
         email,
         password,
         phone_number: phoneNumber,

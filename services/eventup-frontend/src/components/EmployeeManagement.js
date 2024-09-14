@@ -22,7 +22,7 @@ const EmployeeManagement = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/v1/users/employees', {
+      const response = await axios.get('http://rest.yuadgroup.uk/api/v1/users/employees', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -40,7 +40,7 @@ const EmployeeManagement = () => {
         role: 'employee', // Add the role field
       };
 
-      await axios.post('http://localhost:8080/api/v1/users', newEmployee, {
+      await axios.post('http://rest.yuadgroup.uk/api/v1/users', newEmployee, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +55,7 @@ const EmployeeManagement = () => {
 
   const handleUpdateEmployee = async () => {
     try {
-      await axios.put(`http://localhost:8080/api/v1/users/${selectedEmployee.user_id}`, selectedEmployee, {
+      await axios.put(`http://rest.yuadgroup.uk/api/v1/users/${selectedEmployee.user_id}`, selectedEmployee, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -70,7 +70,7 @@ const EmployeeManagement = () => {
 
   const handleDeleteEmployee = async (employeeId) => {
     try {
-      await axios.delete(`http://localhost:8080/api/v1/users/${employeeId}`, {
+      await axios.delete(`http://rest.yuadgroup.uk/api/v1/users/${employeeId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
